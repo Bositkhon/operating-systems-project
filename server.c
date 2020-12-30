@@ -14,7 +14,8 @@ char buffer[BUFSIZE]; // массив буфера
 pthread_mutex_t mutex_buffer = PTHREAD_MUTEX_INITIALIZER; // не знаю зачем она нужна, но не используется
 int read_buffer_ok; // не используется
 void *service_read(void*); // инициализация метода
-void *service_deliver(void *data); // инициализация метода
+void *replyToClientWithMessage(void *data, char *message);
+void *replyToAllClientsWithIncomingMessage(void *data); // инициализация метода
 
 // тип сообщения
 struct msg {
@@ -94,15 +95,23 @@ void *service_read(void *data)
 		}
 		printf("%s\n", buffer); // выводим в консоли сообщение 
 		fflush(stdout);
-		service_deliver(NULL); // этот метод доставляет сообщение полученное от любого клиента всем клиентам
+		replyToClientWithMessage((void *)(long) clientfd, "This is my text");
+		//replyToAllClientsWithIncomingMessage((void *)(long) clientfd); // этот метод доставляет сообщение полученное от любого клиента всем клиентам
 	}
 	//pthread_mutex_unlock(&mutex_buffer);
 	return NULL;
 }
 
-void *service_deliver(void *data)
+void *replyToClientWithMessage(void *data, char *message)
 {
-	// *data is of no use
+  int clientfd = (int)(long)data;
+  int length = strlen(message);
+	send(clientfd, message, length, 0);
+	printf("Replied to client#%d with message: %s\n", clientfd, message);
+}
+
+void *replyToAllClientsWithIncomingMessage(void *data)
+{
 	//pthread_mutex_lock(&mutex_buffer);
 	for (int i = 0, fd = 0; i < 100; i++) { // проходится по массиву дескрипторов каждого клиента
 		if ((fd = clientfd_set[i]) > 0) { // если таковой есть, то есть подключеный
@@ -110,6 +119,7 @@ void *service_deliver(void *data)
 			send(fd, buffer, 98, 0); // отправляет последнее полученное сообщеение в буфере клиенту, то есть грубо говоря всем
 		}
 	}
+	printf("Replied to all clients with incoming message: %s\n", buffer);
 	//pthread_mutex_unlock(&mutex_buffer);
 	return NULL;
 }
