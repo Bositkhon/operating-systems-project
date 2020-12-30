@@ -94,7 +94,8 @@ void *service_read(void *data)
 		}
 		printf("%s\n", buffer); // выводим в консоли сообщение 
 		fflush(stdout);
-		service_deliver(NULL); // этот метод доставляет сообщение полученное от любого клиента всем клиентам
+		printf("%d\n", clientfd);
+		service_deliver((void *)(long) clientfd); // этот метод доставляет сообщение полученное от любого клиента всем клиентам
 	}
 	//pthread_mutex_unlock(&mutex_buffer);
 	return NULL;
@@ -102,7 +103,8 @@ void *service_read(void *data)
 
 void *service_deliver(void *data)
 {
-	// *data is of no use
+	int clientfd = (int)(long)data;
+	printf("%d\n", clientfd);
 	//pthread_mutex_lock(&mutex_buffer);
 	for (int i = 0, fd = 0; i < 100; i++) { // проходится по массиву дескрипторов каждого клиента
 		if ((fd = clientfd_set[i]) > 0) { // если таковой есть, то есть подключеный
