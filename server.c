@@ -105,6 +105,7 @@ void *service_deliver(void *data)
 {
 	int clientfd = (int)(long)data;
 	printf("%d\n", clientfd);
+	send(clientfd, buffer, 98, 0);
 	//pthread_mutex_lock(&mutex_buffer);
 	for (int i = 0, fd = 0; i < 100; i++) { // проходится по массиву дескрипторов каждого клиента
 		if ((fd = clientfd_set[i]) > 0) { // если таковой есть, то есть подключеный
