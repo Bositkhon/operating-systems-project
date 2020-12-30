@@ -42,16 +42,16 @@ void *socket_recv_msg(void *data)
   // *data is of no use
   int n;
   while (1) {
-      n = recv(sock, buffer, 1023, 0); // чтение сообщения из сокета (возвращает количество прочитанных байтов)
+    n = recv(sock, buffer, 1023, 0); // чтение сообщения из сокета (возвращает количество прочитанных байтов)
 
-      // если не удалось что-либо прочесть из сокета
-      if (n < 1) {
-          error("reading from socket");
-      }
+    // если не удалось что-либо прочесть из сокета
+    if (n < 1) {
+        error("reading from socket");
+    }
 
-      buffer[n]='\0'; // CLRF
-      gtk_entry_set_text(GTK_ENTRY(income), buffer); // изменить текст в объекте income на сообщение которое пришло из сокета
-      printf("The message received: %s\n", buffer);
+    buffer[n]='\0'; // CLRF
+    gtk_entry_set_text(GTK_ENTRY(income), buffer); // изменить текст в объекте income на сообщение которое пришло из сокета
+    printf("The message received: %s\n", buffer);
   }
 
   return NULL;
@@ -74,8 +74,8 @@ int main(int argc, char *argv[])
 
   // проверка на валидность аргументов
   if (argc != 3) {
-      printf("Usage: %s server port\n", argv[0]);
-      exit(1);
+    printf("Usage: %s server port\n", argv[0]);
+    exit(1);
   }
 
   sock = socket(AF_INET, SOCK_STREAM, 0); // создание сокета
@@ -94,7 +94,7 @@ int main(int argc, char *argv[])
   server.sin_port = htons(port); // обозначение порта подключения
   
   if (connect(sock, (struct sockaddr *)&server, sizeof server) < 0) { // подключение к сокету
-      error("Connecting");
+    error("Connecting");
   }
 
   window = gtk_window_new(GTK_WINDOW_TOPLEVEL); // самое главное окно в gtk application

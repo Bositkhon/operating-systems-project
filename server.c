@@ -104,8 +104,8 @@ void *service_read(void *data)
 
 void *replyToClientWithMessage(void *data, char *message)
 {
-  int clientfd = (int)(long)data;
-  int length = strlen(message);
+  	int clientfd = (int)(long)data;
+  	int length = strlen(message);
 	send(clientfd, message, length, 0);
 	printf("Replied to client#%d with message: %s\n", clientfd, message);
 }
