@@ -51,6 +51,7 @@ void *socket_recv_msg(void *data)
 
         buffer[n]='\0'; // CLRF
         gtk_entry_set_text(GTK_ENTRY(income), buffer); // изменить текст в объекте income на сообщение которое пришло из сокета
+        printf("The message received: %s\n", buffer);
     }
 
     return NULL;
