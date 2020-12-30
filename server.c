@@ -7,6 +7,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <fcntl.h>
+#include <string.h>
 
 #define BUFSIZE 2048 // максимальный размер буфера
 int clientfd_set[100]; // массив который будет хранить дескрипторы подключений клиентов
