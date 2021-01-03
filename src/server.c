@@ -18,11 +18,20 @@ int read_buffer_ok; // не используется
 void *service_read(void*); // инициализация метода
 void *replyToClientWithMessage(void *data, char *message);
 void *replyToAllClientsWithIncomingMessage(void *data); // инициализация метода
-
-// тип сообщения
-struct msg {
-	char *msg;
-};
+void dispatchAction(const char *action);
+void signIn(const char *email, const char *password);
+void signUp(
+	const char *email,
+	const char *password,
+	const char *first_name,
+	const char *last_name,
+	const char *gender,
+	const char *phone,
+	const char *birth_day,
+	const char *passport_serial,
+	const char *passport_number);
+	
+json_object *response;
 
 int main(int argc, char *argv[])
 {
@@ -97,18 +106,13 @@ void *service_read(void *data)
 			pthread_exit(0); // заканчиваем тред процесс
 		}
 
-		json_object * jobj = json_tokener_parse(buffer);
+		response = json_tokener_parse(buffer);
 
-		char *action = json_object_get_string(json_object_object_get(jobj, "action"));
+		const char *action = json_object_get_string(json_object_object_get(response, "action"));
 
-		// роунтинг
-		if (strcmp(action, "sign-in") == 0) {
-			printf("SIGN IN\n");
-		} else if (strcmp(action, "sign-up") == 0) {
-			printf("SIGN-UP\n");
-		}
+		dispatchAction(action);
 
-		printf("(Server) Received message: %s\n", json_object_to_json_string(jobj)); // выводим в консоли сообщение 
+		printf("(Server) Received message: %s\n", json_object_to_json_string(response)); // выводим в консоли сообщение 
 		// fflush(stdout);
 		replyToClientWithMessage((void *)(long) clientfd, "This is my text");
 		// replyToAllClientsWithIncomingMessage((void *)(long) clientfd); // этот метод доставляет сообщение полученное от любого клиента всем клиентам
@@ -140,4 +144,47 @@ void *replyToAllClientsWithIncomingMessage(void *data)
 	printf("Replied to all clients with incoming message: %s\n", buffer);
 	//pthread_mutex_unlock(&mutex_buffer);
 	return NULL;
+}
+
+void dispatchAction(const char *action)
+{
+	json_object *payload = json_object_object_get(response, "payload");
+
+	if (strcmp(action, "sign-in") == 0) {
+		const char *email = json_object_get_string(json_object_object_get(payload, "email"));
+		const char *password = json_object_get_string(json_object_object_get(payload, "password"));
+
+		signIn(email, password);
+	} else if (strcmp(action, "sign-up") == 0) {
+		const char *email = json_object_get_string(json_object_object_get(payload, "email"));
+		const char *password = json_object_get_string(json_object_object_get(payload, "password"));
+		const char *first_name = json_object_get_string(json_object_object_get(payload, "first_name"));
+		const char *last_name = json_object_get_string(json_object_object_get(payload, "last_name"));
+		const char *gender = json_object_get_string(json_object_object_get(payload, "gender"));
+		const char *phone = json_object_get_string(json_object_object_get(payload, "phone"));
+		const char *birth_day = json_object_get_string(json_object_object_get(payload, "birth_day"));
+		const char *passport_serial = json_object_get_string(json_object_object_get(payload, "passport_serial"));
+		const char *passport_number = json_object_get_string(json_object_object_get(payload, "passport_number"));
+
+		signUp(email, password, first_name, last_name, gender, phone, birth_day, passport_serial, passport_number);
+	}
+}
+
+void signIn(const char *email, const char *password)
+{
+	printf("%s, %s\n", email, password);
+}
+
+void signUp(
+	const char *email,
+	const char *password,
+	const char *first_name,
+	const char *last_name,
+	const char *gender,
+	const char *phone,
+	const char *birth_day,
+	const char *passport_serial,
+	const char *passport_number) {
+		printf("%s, %s, %s, %s, %s, %s, %s, %s, %s",
+		email, password, first_name, last_name, gender, phone, birth_day, passport_serial, passport_number);
 }
