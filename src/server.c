@@ -9,18 +9,26 @@
 #include <fcntl.h>
 #include <string.h>
 #include <json-c/json.h>
+#include <mysql.h>
 
 #define BUFSIZE 2048 // максимальный размер буфера
 int clientfd_set[100]; // массив который будет хранить дескрипторы подключений клиентов
 char buffer[BUFSIZE]; // массив буфера
 pthread_mutex_t mutex_buffer = PTHREAD_MUTEX_INITIALIZER; // не знаю зачем она нужна, но не используется
 int read_buffer_ok; // не используется
+
+int sockfd, clientfd, sockfd_len, client_len;
+unsigned short port;
+struct sockaddr_in server_addr, client_addr;
+
+
 void *service_read(void*); // инициализация метода
-void *replyToClientWithMessage(void *data, char *message);
+void *replyToClientWithMessage(void *data, json_object *request);
 void *replyToAllClientsWithIncomingMessage(void *data); // инициализация метода
-void dispatchAction(const char *action);
-void signIn(const char *email, const char *password);
+void dispatchAction(const char *action,  void *data);
+void signIn(void *data, const char *email, const char *password);
 void signUp(
+	void *data,
 	const char *email,
 	const char *password,
 	const char *first_name,
@@ -35,9 +43,7 @@ json_object *response;
 
 int main(int argc, char *argv[])
 {
-	int sockfd, clientfd, sockfd_len, client_len;
-	unsigned short port;
-	struct sockaddr_in server_addr, client_addr;
+	
 	pthread_t thread_id[100]; // массив дескрипторов тредов для подключенных клиентов
 	
     // валидация аргументов 
@@ -109,25 +115,25 @@ void *service_read(void *data)
 		response = json_tokener_parse(buffer);
 
 		const char *action = json_object_get_string(json_object_object_get(response, "action"));
-
-		dispatchAction(action);
+		dispatchAction(action, (void *)(long) clientfd);
 
 		printf("(Server) Received message: %s\n", json_object_to_json_string(response)); // выводим в консоли сообщение 
 		// fflush(stdout);
-		replyToClientWithMessage((void *)(long) clientfd, "This is my text");
+		//replyToClientWithMessage((void *)(long) clientfd, "This is my text");
 		// replyToAllClientsWithIncomingMessage((void *)(long) clientfd); // этот метод доставляет сообщение полученное от любого клиента всем клиентам
 	}
 	//pthread_mutex_unlock(&mutex_buffer);
 	return NULL;
 }
 
-void *replyToClientWithMessage(void *data, char *message)
+void *replyToClientWithMessage(void *data, json_object *request)
 {
   	int clientfd = (int)(long)data;
-  	int length = strlen(message);
-	
+	char message[BUFSIZE];
+	strcpy(message, json_object_to_json_string(request));
+	printf("\n%s\n", message);
 	if (clientfd > 0) {
-		send(clientfd, message, length, 0);
+		send(clientfd, message, strlen(message), 0);
 		printf("Replied to client#%d with message: %s\n", clientfd, message);	
 	}
 }
@@ -146,7 +152,7 @@ void *replyToAllClientsWithIncomingMessage(void *data)
 	return NULL;
 }
 
-void dispatchAction(const char *action)
+void dispatchAction(const char *action, void *data)
 {
 	json_object *payload = json_object_object_get(response, "payload");
 
@@ -154,7 +160,7 @@ void dispatchAction(const char *action)
 		const char *email = json_object_get_string(json_object_object_get(payload, "email"));
 		const char *password = json_object_get_string(json_object_object_get(payload, "password"));
 
-		signIn(email, password);
+		signIn((void *)(long)data, email, password);
 	} else if (strcmp(action, "sign-up") == 0) {
 		const char *email = json_object_get_string(json_object_object_get(payload, "email"));
 		const char *password = json_object_get_string(json_object_object_get(payload, "password"));
@@ -166,16 +172,61 @@ void dispatchAction(const char *action)
 		const char *passport_serial = json_object_get_string(json_object_object_get(payload, "passport_serial"));
 		const char *passport_number = json_object_get_string(json_object_object_get(payload, "passport_number"));
 
-		signUp(email, password, first_name, last_name, gender, phone, birth_day, passport_serial, passport_number);
+		signUp((void *)(long)data, email, password, first_name, last_name, gender, phone, birth_day, passport_serial, passport_number);
 	}
 }
 
-void signIn(const char *email, const char *password)
+void signIn(void *data, const char *email, const char *password)
 {
+	// char *test_email = "amir.akilbekovich@gmail.com";
+	// char *test_password = "12345678";
+	
+	char test_query[256];
+
+	MYSQL *conn = mysql_init(NULL);
+
+	MYSQL_RES *result;
+	if(mysql_real_connect(conn, "localhost", "root", "12345678", "testdb", 0, NULL, 0)==NULL)
+	{
+		printf("here");
+	}
+	
+	sprintf(test_query, "select id from user where email='%s' and password='%s'", email, password); 
+	printf("\n%s\n", test_query);
+	mysql_query(conn, test_query);
+
+	result = mysql_use_result(conn);
+	 if (result == NULL)
+	{
+		printf("error");
+	}
+	//int num_fields = mysql_num_fields(result);
+	printf("456\n");
+	int rows_num = mysql_num_rows(result);
+	printf("789\n");
+	json_object *request = json_object_new_object();
+	json_object_object_add(request, "action", json_object_new_string("SignIn"));
+	
+	if(rows_num==0)
+	{
+		json_object_object_add(request, "result", json_object_new_int(-1));
+	}
+	else
+	{
+		MYSQL_ROW row = mysql_fetch_row(result);
+		json_object_object_add(request, "result", json_object_new_int(row[0]));
+		
+	}
+	replyToClientWithMessage((void *)(long)data, request);
+	mysql_free_result(result);
+	mysql_close(conn);
+
+
 	printf("%s, %s\n", email, password);
 }
 
 void signUp(
+	void *data,
 	const char *email,
 	const char *password,
 	const char *first_name,
@@ -185,6 +236,68 @@ void signUp(
 	const char *birth_day,
 	const char *passport_serial,
 	const char *passport_number) {
+
+		char test_query[256];
+
+		MYSQL *conn = mysql_init(NULL);
+
+		if(mysql_real_connect(conn, "localhost", "root", "12345678", "testdb", 0, NULL, 0)==NULL)
+		{
+			printf("error");
+		}
+
+		json_object *request = json_object_new_object();
+		json_object_object_add(request, "action", json_object_new_string("SignUp"));	
+		if(validation(email))
+		{
+			json_object_object_add(request, "result", json_object_new_int(-1));
+		}	
+		else
+		{
+			sprintf(test_query, "insert into user (email, password) values ('%s', '%s')", email, password); 
+			mysql_query(conn, test_query);
+			signIn((void *)(long)data, email, password);
+		}
+
 		printf("%s, %s, %s, %s, %s, %s, %s, %s, %s",
 		email, password, first_name, last_name, gender, phone, birth_day, passport_serial, passport_number);
+}
+
+int validation(char *email)
+{
+	char test_query[256];
+	int return_value;
+
+	MYSQL *conn = mysql_init(NULL);
+
+	MYSQL_RES *result;
+	if(mysql_real_connect(conn, "localhost", "root", "12345678", "testdb", 0, NULL, 0)==NULL)
+	{
+		printf("here");
+	}
+	
+	sprintf(test_query, "select id from user where email='%s'", email); 
+	mysql_query(conn, test_query);
+
+	result = mysql_use_result(conn);
+	 if (result == NULL)
+	{
+		printf("error");
+	}
+
+	int rows_num = mysql_num_rows(result);
+
+	
+	if(rows_num==0)
+	{
+		return_value = 1;
+	}
+	else
+	{
+		return_value = 0;
+		
+	}
+	mysql_free_result(result);
+	mysql_close(conn);
+	return return_value;
 }
