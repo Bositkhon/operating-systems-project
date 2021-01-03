@@ -20,6 +20,13 @@ GtkEntry *emailEntry;
 GtkEntry *passwordEntry;
 GtkLabel *messagesLabel;
 
+typedef struct {
+	GtkWidget *email;
+	GtkWidget *password;
+	GtkWidget *login;
+} sign_in_widgets;
+
+//sign_in_widgets *s_in_widgets = g_slice_new(sign_in_widgets);
 int sock;
 struct sockaddr_in server;
 struct hostent *hp;
@@ -66,6 +73,7 @@ int main(int argc, char *argv[])
     pthread_t tid_read;
 
     gtk_init(&argc, &argv);
+    sign_in_widgets *s_in_widgets = g_slice_new(sign_in_widgets);
 
     if (argc != 3) {
         printf("Usage: %s server port\n", argv[0]);
@@ -98,34 +106,37 @@ int main(int argc, char *argv[])
     pthread_create(&tid_read, NULL, receiveFromServer, NULL);
 
     builder = gtk_builder_new();
-    gtk_builder_add_from_file (builder, "glade/login-page.glade", NULL);
+    gtk_builder_add_from_file (builder, "glade/user-page.glade", NULL);
 
-    window = GTK_WIDGET(gtk_builder_get_object(builder, "windowMain"));
-    gtk_builder_connect_signals(builder, NULL);
+    window = GTK_WIDGET(gtk_builder_get_object(builder, "window_main"));
+    s_in_widgets->email  = GTK_WIDGET(gtk_builder_get_object(builder, "sign_in_input_email"));
+    s_in_widgets->password  = GTK_WIDGET(gtk_builder_get_object(builder, "sign_in_input_password"));
+    s_in_widgets->login  = GTK_WIDGET(gtk_builder_get_object(builder, "sign_in_button_login"));
+    
+    gtk_builder_connect_signals(builder, s_in_widgets);
 
-    emailEntry = GTK_WIDGET(gtk_builder_get_object(builder, "emailEntry"));
-    passwordEntry = GTK_WIDGET(gtk_builder_get_object(builder, "passwordEntry"));
 
     g_object_unref(builder);
 
     gtk_widget_show(window);   
 
     gtk_main();
+    g_slice_free(sign_in_widgets, s_in_widgets);
 
     return 0;
 }
 
-void on_windowMain_destroy()
+void on_window_main_destroy()
 {
     send(sock, "e", 1, 0);
     gtk_main_quit();
 }
 
-void signIn()
+void on_sign_in_button_login_clicked(GtkButton *button, sign_in_widgets *widgets)
 {
 
-    const gchar *email = gtk_entry_get_text(emailEntry);
-    const gchar *password = gtk_entry_get_text(passwordEntry);
+    const gchar *email = gtk_entry_get_text(widgets->email);
+    const gchar *password = gtk_entry_get_text(widgets->password);
 
     json_object *signInString = json_object_new_string("sign-in");
     json_object *emailString = json_object_new_string(email);
@@ -152,7 +163,7 @@ void signIn()
     }
 }
 
-void signUp()
+void on_sign_up_button_register_clicked()
 {
     json_object *signInString = json_object_new_string("sign-up");
     json_object_object_add(request, "action", signInString);
