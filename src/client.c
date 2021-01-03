@@ -168,5 +168,8 @@ void signUp()
     {
         perror("write");
     }
+
+    gtk_entry_set_text(emailEntry, "");
+    gtk_entry_set_text(passwordEntry, "");
 }
 
