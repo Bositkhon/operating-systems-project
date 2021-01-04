@@ -85,7 +85,7 @@ int main(int argc, char *argv[])
 		exit(0);
 	}
 
-	if(!mysql_real_connect(conn, server, user, password, database, 0, NULL, 0)==NULL) // Connects to a MySQL server.
+	if(mysql_real_connect(conn, server, user, password, database, 0, NULL, 0)==NULL) // Connects to a MySQL server.
 	{
 		perror("SQL connection error");
 		exit(1);
@@ -205,7 +205,7 @@ void signIn(void *data, const char *email, const char *password)
 	if (result == NULL)
 	{
 		perror("Initiates a row-by-row result error");
-		exit(1)
+		exit(1);
 	}
 	while ((row = mysql_fetch_row(result)) != NULL){ // Fetches the next row from the result set.
 		result_id = atoi(row[0]);
@@ -273,7 +273,7 @@ int validation(char *email)
 	if (result == NULL)
 	{
 		perror("Initiates a row-by-row result error");
-		exit(1)
+		exit(1);
 	}
 	while ((row = mysql_fetch_row(result)) != NULL){} // Fetches the next row from the result set.
 
