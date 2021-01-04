@@ -44,6 +44,13 @@ void signUp(
 	
 json_object *response;
 
+
+// schedule.h
+int addSchedule(json_object *request);
+int deleteSchedule(int pk);
+int modifySchedule(json_object *request, int pk);
+int getSchedule(void *data, int all=0, int pk);
+
 int main(int argc, char *argv[])
 {
 	
@@ -213,14 +220,14 @@ void signIn(void *data, const char *email, const char *password)
 
 	int rows_num = mysql_num_rows(result);// Returns the number of rows in a result set.
 	
-	json_object_object_add(request, "action", json_object_new_string("sign_in"));
+	json_object_object_add(request, "action", json_object_new_string("sign-in"));
 	if(rows_num==0)
 	{
-		json_object_object_add(request, "result", json_object_new_int(-1));
+		json_object_object_add(request, "user-id", json_object_new_int(-1));
 	}
 	else
 	{
-		json_object_object_add(request, "result", json_object_new_int(result_id));	
+		json_object_object_add(request, "user-id", json_object_new_int(result_id));	
 	}
 	replyToClientWithMessage((void *)(long)data, request);
 	mysql_free_result(result); // Frees memory used by a result set.
@@ -243,11 +250,11 @@ void signUp(
 
 		char test_query[256];
 		json_object *request = json_object_new_object();
-		json_object_object_add(request, "action", json_object_new_string("sign_up"));	
+		json_object_object_add(request, "action", json_object_new_string("sign-up"));	
 
 		if(validation(email))
 		{
-			json_object_object_add(request, "result", json_object_new_int(-1));
+			json_object_object_add(request, "user-id", json_object_new_int(-1));
 		}	
 		else
 		{
@@ -289,4 +296,101 @@ int validation(char *email)
 	}
 	mysql_free_result(result);
 	return return_value;
+}
+
+json_object getSchedule(void *data, int all=1, int pk)
+{
+    char query[256], s_id[5];
+
+	int coutner = 0;
+
+	json_object *schedules = json_object_new_object();
+	json_object *schedules_counter = json_object_new_object();
+	json_object *schedules_data = json_object_new_object();
+
+	//json_object *idNum;
+	json_object *trainIdNum;
+	json_object *departureCityString;
+    json_object *arrivalCityString;
+    json_object *departureDatetimeString;
+	json_object *arrivalDatetimeString;
+	json_object *distanceDouble;
+
+	json_object_object_add(schedules, "action", json_object_new_string("get-all-schedule"));
+	if(all == 0)
+	{
+		sprintf(query, "select * from schedules where id = %d", pk);
+	}
+	else 
+	{
+		sprintf(query, "select * from schedules");
+	}
+	mysql_query(conn, query);
+
+	result = mysql_use_result(conn);
+	while((row = mysql_fetch_row(result)) != NULL)
+	{
+		//idNum = json_object_new_int(row[0]);
+		trainIdNum = json_object_new_int(row[1]);
+		departureCityString = json_object_new_string(row[2]);
+		arrivalCityString = json_object_new_string(row[3]);
+		departureDatetimeString = json_object_new_string(row[4]);
+		arrivalDatetimeString = json_object_new_string(row[5]);
+		distanceDouble = json_object_new_double(row[6]);
+
+		json_object_object_add(schedules_data, "train-id", trainIdNum);
+		json_object_object_add(schedules_data, "departure-city", departureCityString));
+		json_object_object_add(schedules_data, "arrival-city", arrivalCityString));
+		json_object_object_add(schedules_data, "departure-datetime", departureDatetimeString));
+		json_object_object_add(schedules_data, "arrival-datetime", arrivalDatetimeString));
+		json_object_object_add(schedules_data, "distance", distanceDouble));
+
+		json_object_object_add(schedules_counter, itoa(row[0], s_id, 5), schedules_data);
+		//TODO array
+	}
+    json_object_object_add(schedules, "result", schedules_counter)
+
+    return schedules;
+}
+
+int addSchedule(json_object *request)
+{
+	const int train_id = json_object_get_int(json_object_object_get(request, "train-id"));
+	const char *departure_city = json_object_get_string(json_object_object_get(request, "departure-city");
+	const char *arrival_city = json_object_get_string(json_object_object_get(request, "arrival-city");
+	const char *departure_datetime = json_object_get_string(json_object_object_get(request, "departure-datetime");
+	const char *arrival_datetime = json_object_get_string(json_object_object_get(request, "arrival-datetime");
+	const double double distance = json_object_get_double(json_object_object_get(request, "distance");
+
+	char query[256];
+
+	sprintf(query, 
+		"insert into schedules (train_id, departure_city, arrival_city, departure_datetime, arrival_datetime, distance) values (%d, '%s', '%s', '%s', '%s', %lf)", 
+			train_id, departure_city, arrival_city, departure_datetime, arrival_datetime, distance);
+
+	return mysql_query(conn, query);
+}
+
+int deleteSchedule(int pk)
+{
+	char query[256];
+
+	sprintf(query, "delete from schedules where id=%d", pk);//TODO after booking deletion
+	return mysql_query(conn, query);
+}
+
+int modifySchedule(json_object *request, int pk)
+{
+	const int train_id = json_object_get_int(json_object_object_get(request, "train-id"));
+	const char *departure_city = json_object_get_string(json_object_object_get(request, "departure-city");
+	const char *arrival_city = json_object_get_string(json_object_object_get(request, "arrival-city");
+	const char *departure_datetime = json_object_get_string(json_object_object_get(request, "departure-datetime");
+	const char *arrival_datetime = json_object_get_string(json_object_object_get(request, "arrival-datetime");
+	const double distance = json_object_get_double(json_object_object_get(request, "distance");
+	char query[256];
+
+	sprintf(query, "update schedules set train_id=%d, departure_city='%s', arrival_city='%s', departure_datetime='%s', arrival_datetime='%s', distance=%lf where id=%d",
+			train_id, departure_city, arrival_city, departure_datetime, arrival_datetime, distance, pk);
+	
+	return mysql_query(conn, query);
 }

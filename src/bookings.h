@@ -1,0 +1,2 @@
+int bookTicket();
+int getAllBookedTickets();
