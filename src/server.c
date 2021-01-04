@@ -185,12 +185,12 @@ void signIn(void *data, const char *email, const char *password)
 
 	MYSQL *conn = mysql_init(NULL);
 
-	if(!mysql_real_connect(conn, "localhost", "root", "password", "TestDb", 0, NULL, 0)==NULL)
+	if(!mysql_real_connect(conn, "localhost", "amupd", "password", "testdb", 0, NULL, 0)==NULL)
 	{
 		printf("here");
 	}
 		
-	sprintf(test_query, "select id from users where email='%s' and password='%s'", email, password); 
+	sprintf(test_query, "select id from user where email='%s' and password='%s'", email, password); 
 	printf("\n%s\n", test_query);
 	mysql_query(conn, test_query);
 	MYSQL_RES *result;
@@ -207,9 +207,9 @@ void signIn(void *data, const char *email, const char *password)
 		result_id = atoi(row[0]);
 	}
 
-	printf("456\n");
+
 	unsigned long int rows_num = mysql_num_rows(result);
-	printf("789\n");
+
 	json_object *request = json_object_new_object();
 	json_object_object_add(request, "action", json_object_new_string("SignIn"));
 	
@@ -248,7 +248,7 @@ void signUp(
 		MYSQL *conn = mysql_init(NULL);
 		MYSQL_STMT *statement = mysql_stmt_init(conn);
 
-		if(mysql_real_connect(conn, "localhost", "root", "12345678", "testdb", 0, NULL, 0)==NULL)
+		if(mysql_real_connect(conn, "localhost", "amupd", "password", "testdb", 0, NULL, 0)==NULL)
 		{
 			printf("error");
 		}
@@ -262,7 +262,7 @@ void signUp(
 		else
 		{
 			//mysql_stmt_prepare(statement, query, strlen(query));
-			sprintf(test_query,"insert into user (email, password) values ('%s', '%s')", email, password); 
+			sprintf(test_query,"insert into user (email, password, first_name, last_name, gender, phone, birth_day, passport_serial, passport_number) values ('%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s')", email, password, first_name, last_name, gender, phone, birth_day, passport_serial, passport_number); 
 			mysql_query(conn, test_query);
 			signIn((void *)(long)data, email, password);
 		}
