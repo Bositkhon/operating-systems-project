@@ -49,7 +49,7 @@ json_object *response;
 int addSchedule(json_object *request);
 int deleteSchedule(int pk);
 int modifySchedule(json_object *request, int pk);
-int getSchedule(void *data, int all=0, int pk);
+json_object *getEveryOrOneSchedule(int pk);
 
 int main(int argc, char *argv[])
 {
@@ -298,15 +298,12 @@ int validation(char *email)
 	return return_value;
 }
 
-json_object getSchedule(void *data, int all=1, int pk)
+json_object *getEveryOrOneSchedule(int pk)
 {
-    char query[256], s_id[5];
+    char query[256];
 
-	int coutner = 0;
-
-	json_object *schedules = json_object_new_object();
-	json_object *schedules_counter = json_object_new_object();
-	json_object *schedules_data = json_object_new_object();
+	json_object *schedule = json_object_new_object();
+	json_object *list_of_schedules = json_object_new_object();
 
 	//json_object *idNum;
 	json_object *trainIdNum;
@@ -316,8 +313,8 @@ json_object getSchedule(void *data, int all=1, int pk)
 	json_object *arrivalDatetimeString;
 	json_object *distanceDouble;
 
-	json_object_object_add(schedules, "action", json_object_new_string("get-all-schedule"));
-	if(all == 0)
+	json_object_object_add(schedule, "action", json_object_new_string("get-all-schedule"));
+	if(pk != -1)
 	{
 		sprintf(query, "select * from schedules where id = %d", pk);
 	}
@@ -338,29 +335,29 @@ json_object getSchedule(void *data, int all=1, int pk)
 		arrivalDatetimeString = json_object_new_string(row[5]);
 		distanceDouble = json_object_new_double(row[6]);
 
-		json_object_object_add(schedules_data, "train-id", trainIdNum);
-		json_object_object_add(schedules_data, "departure-city", departureCityString));
-		json_object_object_add(schedules_data, "arrival-city", arrivalCityString));
-		json_object_object_add(schedules_data, "departure-datetime", departureDatetimeString));
-		json_object_object_add(schedules_data, "arrival-datetime", arrivalDatetimeString));
-		json_object_object_add(schedules_data, "distance", distanceDouble));
+		json_object_object_add(schedule, "train-id", trainIdNum);
+		json_object_object_add(schedule, "departure-city", departureCityString);
+		json_object_object_add(schedule, "arrival-city", arrivalCityString);
+		json_object_object_add(schedule, "departure-datetime", departureDatetimeString);
+		json_object_object_add(schedule, "arrival-datetime", arrivalDatetimeString);
+		json_object_object_add(schedule, "distance", distanceDouble);
 
-		json_object_object_add(schedules_counter, itoa(row[0], s_id, 5), schedules_data);
-		//TODO array
+		json_object_array_add(list_of_schedules, schedule);
+
 	}
-    json_object_object_add(schedules, "result", schedules_counter)
+    json_object_object_add(schedule, "result", list_of_schedules);
 
-    return schedules;
+    return schedule;
 }
 
 int addSchedule(json_object *request)
 {
 	const int train_id = json_object_get_int(json_object_object_get(request, "train-id"));
-	const char *departure_city = json_object_get_string(json_object_object_get(request, "departure-city");
-	const char *arrival_city = json_object_get_string(json_object_object_get(request, "arrival-city");
-	const char *departure_datetime = json_object_get_string(json_object_object_get(request, "departure-datetime");
-	const char *arrival_datetime = json_object_get_string(json_object_object_get(request, "arrival-datetime");
-	const double double distance = json_object_get_double(json_object_object_get(request, "distance");
+	const char *departure_city = json_object_get_string(json_object_object_get(request, "departure-city"));
+	const char *arrival_city = json_object_get_string(json_object_object_get(request, "arrival-city"));
+	const char *departure_datetime = json_object_get_string(json_object_object_get(request, "departure-datetime"));
+	const char *arrival_datetime = json_object_get_string(json_object_object_get(request, "arrival-datetime"));
+	const double distance = json_object_get_double(json_object_object_get(request, "distance"));
 
 	char query[256];
 
@@ -382,11 +379,11 @@ int deleteSchedule(int pk)
 int modifySchedule(json_object *request, int pk)
 {
 	const int train_id = json_object_get_int(json_object_object_get(request, "train-id"));
-	const char *departure_city = json_object_get_string(json_object_object_get(request, "departure-city");
-	const char *arrival_city = json_object_get_string(json_object_object_get(request, "arrival-city");
-	const char *departure_datetime = json_object_get_string(json_object_object_get(request, "departure-datetime");
-	const char *arrival_datetime = json_object_get_string(json_object_object_get(request, "arrival-datetime");
-	const double distance = json_object_get_double(json_object_object_get(request, "distance");
+	const char *departure_city = json_object_get_string(json_object_object_get(request, "departure-city"));
+	const char *arrival_city = json_object_get_string(json_object_object_get(request, "arrival-city"));
+	const char *departure_datetime = json_object_get_string(json_object_object_get(request, "departure-datetime"));
+	const char *arrival_datetime = json_object_get_string(json_object_object_get(request, "arrival-datetime"));
+	const double distance = json_object_get_double(json_object_object_get(request, "distance"));
 	char query[256];
 
 	sprintf(query, "update schedules set train_id=%d, departure_city='%s', arrival_city='%s', departure_datetime='%s', arrival_datetime='%s', distance=%lf where id=%d",
