@@ -21,6 +21,9 @@ int sockfd, clientfd, sockfd_len, client_len;
 unsigned short port;
 struct sockaddr_in server_addr, client_addr;
 
+MYSQL *conn;
+MYSQL_RES *result;
+MYSQL_ROW *row;
 
 void *service_read(void*); // инициализация метода
 void *replyToClientWithMessage(void *data, json_object *request);
@@ -44,8 +47,14 @@ json_object *response;
 int main(int argc, char *argv[])
 {
 	
+	char *server = "localhost";
+  	char *user = "amupd";
+  	char *password = "password"; /* set me first */
+  	char *database = "testdb";
+
 	pthread_t thread_id[100]; // массив дескрипторов тредов для подключенных клиентов
-	
+	conn = mysql_init(NULL); //database initialization
+
     // валидация аргументов 
 	if (argc < 2){
 		fprintf(stderr, "usage %s portnumber\n", argv[0]);
@@ -76,6 +85,11 @@ int main(int argc, char *argv[])
 		exit(0);
 	}
 
+	if(mysql_real_connect(conn, server, user, password, database, 0, NULL, 0)==NULL) // Connects to a MySQL server.
+	{
+		perror("SQL connection error");
+		exit(1);
+	}
 	while (1) {
 		client_len = sizeof(client_addr); // размер адреса клиента
 		clientfd = accept(sockfd, (struct sockaddr *)&client_addr, (socklen_t *)&client_len); // ожидание подключения клиента
@@ -91,6 +105,7 @@ int main(int argc, char *argv[])
 			}
 		}
 	}
+	mysql_close(conn);// Closes a server connection.
 	return 0;
 }
 
@@ -178,55 +193,38 @@ void dispatchAction(const char *action, void *data)
 
 void signIn(void *data, const char *email, const char *password)
 {
-	// char *test_email = "amir.akilbekovich@gmail.com";
-	// char *test_password = "12345678";
-	
 	char test_query[256];
-
-	MYSQL *conn = mysql_init(NULL);
-
-	if(!mysql_real_connect(conn, "localhost", "amupd", "password", "testdb", 0, NULL, 0)==NULL)
-	{
-		printf("here");
-	}
+	int result_id;
+	json_object *request = json_object_new_object();
 		
 	sprintf(test_query, "select id from user where email='%s' and password='%s'", email, password); 
-	printf("\n%s\n", test_query);
-	mysql_query(conn, test_query);
-	MYSQL_RES *result;
-	MYSQL_ROW *row;
+	mysql_query(conn, test_query);// Querry execution
 
-	result = mysql_use_result(conn);
+	result = mysql_use_result(conn);// Initiates a row-by-row result set retrieval.
 
 	if (result == NULL)
 	{
-		printf("error");
+		perror("Initiates a row-by-row result error");
+		exit(1);
 	}
-	int result_id;
-	while ((row = mysql_fetch_row(result)) != NULL){
+	while ((row = mysql_fetch_row(result)) != NULL){ // Fetches the next row from the result set.
 		result_id = atoi(row[0]);
 	}
 
-
-	unsigned long int rows_num = mysql_num_rows(result);
-
-	json_object *request = json_object_new_object();
-	json_object_object_add(request, "action", json_object_new_string("SignIn"));
+	int rows_num = mysql_num_rows(result);// Returns the number of rows in a result set.
 	
+	json_object_object_add(request, "action", json_object_new_string("sign_in"));
 	if(rows_num==0)
 	{
 		json_object_object_add(request, "result", json_object_new_int(-1));
 	}
 	else
 	{
-		MYSQL_ROW row = mysql_fetch_row(result);
-		json_object_object_add(request, "result", json_object_new_int(result_id));
-		
+		json_object_object_add(request, "result", json_object_new_int(result_id));	
 	}
 	replyToClientWithMessage((void *)(long)data, request);
-	mysql_free_result(result);
-	mysql_close(conn);
-
+	mysql_free_result(result); // Frees memory used by a result set.
+	
 
 	printf("%s, %s\n", email, password);
 }
@@ -244,26 +242,18 @@ void signUp(
 	const char *passport_number) {
 
 		char test_query[256];
-
-		MYSQL *conn = mysql_init(NULL);
-		MYSQL_STMT *statement = mysql_stmt_init(conn);
-
-		if(mysql_real_connect(conn, "localhost", "amupd", "password", "testdb", 0, NULL, 0)==NULL)
-		{
-			printf("error");
-		}
-
 		json_object *request = json_object_new_object();
-		json_object_object_add(request, "action", json_object_new_string("SignUp"));	
+		json_object_object_add(request, "action", json_object_new_string("sign_up"));	
+
 		if(validation(email))
 		{
 			json_object_object_add(request, "result", json_object_new_int(-1));
 		}	
 		else
 		{
-			//mysql_stmt_prepare(statement, query, strlen(query));
-			sprintf(test_query,"insert into user (email, password, first_name, last_name, gender, phone, birth_day, passport_serial, passport_number) values ('%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s')", email, password, first_name, last_name, gender, phone, birth_day, passport_serial, passport_number); 
-			mysql_query(conn, test_query);
+			sprintf(test_query, "insert into user (email, password, first_name, last_name, gender, phone, birth_day, passport_serial, passport_number) values ('%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s')", 
+						email, password, first_name, last_name, gender, phone, birth_day, passport_serial, passport_number); 
+			mysql_query(conn, test_query);// Querry execution
 			signIn((void *)(long)data, email, password);
 		}
 
@@ -275,27 +265,20 @@ int validation(char *email)
 {
 	char test_query[256];
 	int return_value;
-
-	MYSQL *conn = mysql_init(NULL);
-
-	MYSQL_RES *result;
-	if(mysql_real_connect(conn, "localhost", "root", "12345678", "testdb", 0, NULL, 0)==NULL)
-	{
-		printf("here");
-	}
 	
 	sprintf(test_query, "select id from user where email='%s'", email); 
-	mysql_query(conn, test_query);
+	mysql_query(conn, test_query);// Querry execution
 
-	result = mysql_use_result(conn);
-	 if (result == NULL)
+	result = mysql_use_result(conn); // Initiates a row-by-row result set retrieval.
+	if (result == NULL)
 	{
-		printf("error");
+		perror("Initiates a row-by-row result error");
+		exit(1);
 	}
+	while ((row = mysql_fetch_row(result)) != NULL){} // Fetches the next row from the result set.
 
-	int rows_num = mysql_num_rows(result);
+	int rows_num = mysql_num_rows(result); // Returns the number of rows in a result set.
 
-	
 	if(rows_num==0)
 	{
 		return_value = 1;
@@ -303,9 +286,7 @@ int validation(char *email)
 	else
 	{
 		return_value = 0;
-		
 	}
 	mysql_free_result(result);
-	mysql_close(conn);
 	return return_value;
 }
