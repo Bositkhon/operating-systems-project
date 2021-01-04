@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Generated with glade 3.22.1 -->
+<!-- Generated with glade 3.22.2 -->
 <interface>
   <requires lib="gtk+" version="3.20"/>
   <object class="GtkWindow" id="window_main">
     <property name="can_focus">False</property>
     <signal name="destroy" handler="on_window_main_destroy" swapped="no"/>
-    <child>
+    <child type="titlebar">
       <placeholder/>
     </child>
     <child>
@@ -159,7 +159,7 @@
               </object>
               <packing>
                 <property name="name">page0</property>
-                <property name="title" translatable="yes">Sing in</property>
+                <property name="title" translatable="yes">Sign in</property>
               </packing>
             </child>
             <child>
