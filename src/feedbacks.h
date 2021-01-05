@@ -1,2 +1,0 @@
-int getFeedBack();
-int setFeedBack();
