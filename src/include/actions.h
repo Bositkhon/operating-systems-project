@@ -6,7 +6,7 @@
 #include <mysql/mysql.h>
 #include "database.h"
 #include "socket.h"
-// #include "socket_constants.h"
+#include "../entities/User.h"
 
 extern MYSQL *connection;
 extern MYSQL_RES *result;
@@ -59,7 +59,7 @@ void signIn(void *data, const char *email, const char *password)
 {
 	char test_query[256];
 		
-	sprintf(test_query, "select id from user where email='%s' and password='%s'", email, password); 
+	sprintf(test_query, "select * from user where email='%s' and password='%s'", email, password); 
 	printf("\n%s\n", test_query);
 	mysql_query(connection, test_query);
 
@@ -69,28 +69,41 @@ void signIn(void *data, const char *email, const char *password)
 	{
 		printf("error");
 	}
-    
-	int result_id;
+
+	struct User *authenticatedUser = malloc(sizeof(struct User));
 
 	while ((row = (MYSQL_ROW *)mysql_fetch_row(result)) != NULL){
-		result_id = atoi((char *)(row[0]));
+		// TODO: double-check
+		authenticatedUser->id = (unsigned int)atoi((char *)(row[0]));
+		authenticatedUser->email = (char *)row[1];
+		authenticatedUser->password = (char *)row[2];
+		break;
 	}
 
 
 	unsigned long int rows_num = mysql_num_rows(result);
 
 	json_object *request = json_object_new_object();
-	json_object_object_add(request, "action", json_object_new_string("SignIn"));
+	json_object_object_add(request, "action", json_object_new_string("sing-in"));
 	
 	if (rows_num == 0)
 	{
-		json_object_object_add(request, "result", json_object_new_int(-1));
+		// json_object_object_add(request, "payload", json_object_new_int(-1));
+		json_object *payload = json_object_new_object();
+		json_object_object_add(payload, "success", json_object_new_int(0));
+		json_object_object_add(payload, "message", json_object_new_string("Wrong credentials"));
+		json_object_object_add(request, "payload", payload);
 	}
 	else
 	{
-		MYSQL_ROW row = mysql_fetch_row(result);
-		json_object_object_add(request, "result", json_object_new_int(result_id));
-		
+		printf("authenticated email %s\n", authenticatedUser->email);
+		json_object *payload = json_object_new_object();
+		json_object_object_add(payload, "success", json_object_new_int(1));
+		json_object *me = json_object_new_object();
+		json_object_object_add(me, "id", json_object_new_int(authenticatedUser->id));
+		json_object_object_add(me, "email", json_object_new_string(authenticatedUser->email));
+		json_object_object_add(payload, "me", me);
+		json_object_object_add(request, "payload", payload);
 	}
 	replyToClientWithMessage((void *)(long)data, request);
 	mysql_free_result(result);
@@ -149,13 +162,12 @@ int validation(const char *email)
 	if(rows_num==0)
 	{
 		return_value = 1;
-	}
-	else
-	{
+	} else {
 		return_value = 0;
-		
 	}
+
 	mysql_free_result(result);
+
 	return return_value;
 }
 
