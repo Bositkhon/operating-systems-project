@@ -147,7 +147,12 @@ int main(int argc, char *argv[])
     return 0;
 }
 
-void on_window_main_destroy()
+void on_window_user_destroy()
+{
+    send(sock, "e", 1, 0);
+    gtk_main_quit();
+}
+void on_window_dashboard_destroy()
 {
     send(sock, "e", 1, 0);
     gtk_main_quit();

@@ -59,7 +59,7 @@ void signIn(void *data, const char *email, const char *password)
 {
 	char test_query[256];
 		
-	sprintf(test_query, "select * from user where email='%s' and password='%s'", email, password); 
+	sprintf(test_query, "select * from users where email='%s' and password='%s'", email, password); 
 	printf("\n%s\n", test_query);
 	mysql_query(connection, test_query);
 
