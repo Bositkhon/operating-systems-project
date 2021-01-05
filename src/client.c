@@ -31,9 +31,10 @@ int sock;
 struct sockaddr_in server;
 struct hostent *hp;
 unsigned short port;
-gchar buffer[1024];
+gchar buffer[2048];
 
 json_object *request;
+json_object *response;
 
 void request_init()
 {
@@ -42,17 +43,24 @@ void request_init()
     json_object_object_add(request, "payload", NULL);
 }
 
+void response_init()
+{
+    response = json_object_new_object();
+    json_object_object_add(response, "action", NULL);
+    json_object_object_add(response, "payload", NULL);
+}
+
 void error(char *msg)
 {
   perror(msg);
   exit(0);
 }
 
-void *receiveFromServer (void *data)
+void *receiveFromServer(void *data)
 {
     int n;
     while (1) {
-        n = recv(sock, buffer, 1023, 0);
+        n = recv(sock, buffer, 2048, 0);
 
         if (n < 1) {
             error("Reading from socket");
@@ -60,8 +68,13 @@ void *receiveFromServer (void *data)
 
         buffer[n] = '\0';
 
-        // TODO: action on messaged received
-        printf("(Client) The message received: %s\n", buffer);
+        response = json_tokener_parse(buffer);
+
+        const char *action = json_object_get_string(json_object_object_get(response, "action"));
+
+        printf("Action is %s\n", action);
+
+        printf("(Client) The message received: %s\n", json_object_to_json_string(response));
     }
 
     return 0;
