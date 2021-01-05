@@ -75,6 +75,21 @@
               <object class="GtkFixed" id="dashboard_stack_dashboard">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
+                <child>
+                  <object class="GtkButton" id="go_user">
+                    <property name="label" translatable="yes">Go user</property>
+                    <property name="width_request">100</property>
+                    <property name="height_request">80</property>
+                    <property name="visible">True</property>
+                    <property name="can_focus">True</property>
+                    <property name="receives_default">True</property>
+                    <signal name="clicked" handler="on_go_user_clicked" swapped="no"/>
+                  </object>
+                  <packing>
+                    <property name="x">232</property>
+                    <property name="y">63</property>
+                  </packing>
+                </child>
               </object>
               <packing>
                 <property name="name">page0</property>
@@ -545,6 +560,7 @@
                             <property name="can_focus">True</property>
                             <property name="receives_default">True</property>
                             <property name="halign">end</property>
+                            <signal name="clicked" handler="on_sign_up_button_register_clicked" swapped="no"/>
                           </object>
                           <packing>
                             <property name="left_attach">1</property>
