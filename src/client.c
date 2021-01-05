@@ -18,13 +18,13 @@ GtkBuilder *builder;
 GtkWidget *window_user;
 GtkWidget *window_dashboard;
 
-struct sign_in_widgets {
+typedef struct{
 	GtkWidget *email;
 	GtkWidget *password;
 	GtkWidget *login;
-};
+} sign_in_widgets;
 
-struct sign_up_widgets{
+typedef struct{
 	GtkWidget *email;
 	GtkWidget *password;
 	GtkWidget *firstname;
@@ -34,10 +34,10 @@ struct sign_up_widgets{
    GtkWidget *birth_date;
    GtkWidget *passport_serial;
    GtkWidget *passport_number;
-};
+} sign_up_widgets;
 
-struct sign_in_widgets *s_in_widgets;
-struct sign_up_widgets *s_up_widgets;
+sign_in_widgets *s_in_widgets;
+sign_up_widgets *s_up_widgets;
 
 //sign_in_widgets *s_in_widgets = g_slice_new(sign_in_widgets);
 int sock;
@@ -120,8 +120,8 @@ int main(int argc, char *argv[])
     pthread_t tid_read;
 
     gtk_init(&argc, &argv);
-   // s_in_widgets = g_slice_new(sign_in_widgets);
-    //s_up_widgets = g_slice_new(sign_up_widgets);
+    s_in_widgets = g_slice_new(sign_in_widgets);
+    s_up_widgets = g_slice_new(sign_up_widgets);
 
     if (argc != 3) {
         printf("Usage: %s server port\n", argv[0]);
@@ -160,10 +160,9 @@ int main(int argc, char *argv[])
     window_dashboard = GTK_WIDGET(gtk_builder_get_object(builder, "window_dashboard"));
     
     s_in_widgets->email = GTK_WIDGET(gtk_builder_get_object(builder, "sign_in_input_email"));
-/*    
-s_in_widgets->password  = GTK_WIDGET(gtk_builder_get_object(builder, "sign_in_input_password"));
+   
+	 s_in_widgets->password  = GTK_WIDGET(gtk_builder_get_object(builder, "sign_in_input_password"));
     s_in_widgets->login  = GTK_WIDGET(gtk_builder_get_object(builder, "sign_in_button_login"));
-    s_in_widgets->message_label  = (GtkLabel *)GTK_WIDGET(gtk_builder_get_object(builder, "message_label"));
     
     s_up_widgets->email  = GTK_WIDGET(gtk_builder_get_object(builder, "sign_up_input_email"));
     s_up_widgets->password  = GTK_WIDGET(gtk_builder_get_object(builder, "sign_up_input_password"));
@@ -173,7 +172,7 @@ s_in_widgets->password  = GTK_WIDGET(gtk_builder_get_object(builder, "sign_in_in
     s_up_widgets->birth_date  = GTK_WIDGET(gtk_builder_get_object(builder, "sign_up_input_birth_date"));
     s_up_widgets->passport_serial  = GTK_WIDGET(gtk_builder_get_object(builder, "sign_up_input_passport_serial"));
     s_up_widgets->passport_number  = GTK_WIDGET(gtk_builder_get_object(builder, "sign_up_input_passport_number"));
-    */
+    
     gtk_builder_connect_signals(builder, NULL);
 
 
@@ -184,7 +183,8 @@ s_in_widgets->password  = GTK_WIDGET(gtk_builder_get_object(builder, "sign_in_in
      
 
     gtk_main();
-    //g_slice_free(sign_in_widgets,s_in_widgets);
+    g_slice_free(sign_in_widgets, s_in_widgets);
+    g_slice_free(sign_up_widgets, s_up_widgets);
 
     return 0;
 }
@@ -242,16 +242,19 @@ void on_sign_up_button_register_clicked(GtkButton *button)
     
     json_object *payload = json_object_new_object();
     json_object_object_add(payload, "email", json_object_new_string(gtk_entry_get_text(s_up_widgets->email)));
+    
     json_object_object_add(payload, "password", json_object_new_string(gtk_entry_get_text(s_up_widgets->password)));
-    json_object_object_add(payload, "firstname", json_object_new_string(gtk_entry_get_text(s_up_widgets->firstname)));
-    json_object_object_add(payload, "lastname", json_object_new_string(gtk_entry_get_text(s_up_widgets->lastname)));
+    json_object_object_add(payload, "first_name", json_object_new_string(gtk_entry_get_text(s_up_widgets->firstname)));
+    json_object_object_add(payload, "last_name", json_object_new_string(gtk_entry_get_text(s_up_widgets->lastname)));
     json_object_object_add(payload, "phone", json_object_new_string(gtk_entry_get_text(s_up_widgets->phone)));
     json_object_object_add(payload, "gender", json_object_new_string(s_up_widgets->gender));
     json_object_object_add(payload, "birth_date", json_object_new_string(gtk_entry_get_text(s_up_widgets->birth_date)));
     json_object_object_add(payload, "passport_serial", json_object_new_string(gtk_entry_get_text(s_up_widgets->passport_serial)));
     json_object_object_add(payload, "passport_number", json_object_new_string(gtk_entry_get_text(s_up_widgets->passport_number)));
-
+    
+    
     json_object_object_add(request, "payload", payload);
+    printf("%s",s_up_widgets->gender);
 
     char temp_buff[100000];
 
