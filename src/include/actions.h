@@ -27,7 +27,7 @@ void signUp(
 	const char *birth_day,
 	const char *passport_serial,
 	const char *passport_number);
-int validation(char *email);
+int validation(const char *email);
 
 void *replyToClientWithMessage(void *data, json_object *request)
 {
@@ -72,8 +72,8 @@ void signIn(void *data, const char *email, const char *password)
     
 	int result_id;
 
-	while ((row = mysql_fetch_row(result)) != NULL){
-		result_id = atoi(row[0]);
+	while ((row = (MYSQL_ROW *)mysql_fetch_row(result)) != NULL){
+		result_id = atoi((char *)(row[0]));
 	}
 
 
@@ -129,7 +129,7 @@ void signUp(
 		email, password, first_name, last_name, gender, phone, birth_day, passport_serial, passport_number);
 }
 
-int validation(char *email)
+int validation(const char *email)
 {
 	char test_query[256];
 	int return_value;

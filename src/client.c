@@ -21,9 +21,9 @@ GtkEntry *passwordEntry;
 GtkLabel *messagesLabel;
 
 typedef struct {
-	GtkWidget *email;
-	GtkWidget *password;
-	GtkWidget *login;
+	GtkEntry *email;
+	GtkEntry *password;
+	GtkEntry *login;
 } sign_in_widgets;
 
 //sign_in_widgets *s_in_widgets = g_slice_new(sign_in_widgets);
@@ -109,9 +109,9 @@ int main(int argc, char *argv[])
     gtk_builder_add_from_file (builder, "glade/user-page.glade", NULL);
 
     window = GTK_WIDGET(gtk_builder_get_object(builder, "window_main"));
-    s_in_widgets->email  = GTK_WIDGET(gtk_builder_get_object(builder, "sign_in_input_email"));
-    s_in_widgets->password  = GTK_WIDGET(gtk_builder_get_object(builder, "sign_in_input_password"));
-    s_in_widgets->login  = GTK_WIDGET(gtk_builder_get_object(builder, "sign_in_button_login"));
+    s_in_widgets->email  = (GtkEntry *)GTK_WIDGET(gtk_builder_get_object(builder, "sign_in_input_email"));
+    s_in_widgets->password  = (GtkEntry *)GTK_WIDGET(gtk_builder_get_object(builder, "sign_in_input_password"));
+    s_in_widgets->login  = (GtkEntry *)GTK_WIDGET(gtk_builder_get_object(builder, "sign_in_button_login"));
     
     gtk_builder_connect_signals(builder, s_in_widgets);
 
