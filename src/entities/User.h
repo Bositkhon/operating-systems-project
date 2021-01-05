@@ -3,16 +3,16 @@
 
 struct User
 {
-    const char *id;
-    const char *email;
-    const char *password;
-	const char *first_name;
-	const char *last_name;
-	const char *gender;
-	const char *phone;
-	const char *birth_day;
-	const char *passport_serial;
-	const char *passport_number;
+    unsigned int id;
+    char *email;
+    char *password;
+	char *first_name;
+	char *last_name;
+	char *gender;
+	char *phone;
+	char *birth_day;
+	char *passport_serial;
+	char *passport_number;
 };
 
 
