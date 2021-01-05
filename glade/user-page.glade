@@ -156,6 +156,17 @@
                     </child>
                   </object>
                 </child>
+                <child>
+                  <object class="GtkLabel" id="message_label">
+                    <property name="width_request">240</property>
+                    <property name="visible">True</property>
+                    <property name="can_focus">False</property>
+                  </object>
+                  <packing>
+                    <property name="x">217</property>
+                    <property name="y">162</property>
+                  </packing>
+                </child>
               </object>
               <packing>
                 <property name="name">page0</property>

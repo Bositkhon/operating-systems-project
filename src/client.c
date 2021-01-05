@@ -18,14 +18,11 @@ GtkBuilder *builder;
 GtkWidget *window_user;
 GtkWidget *window_dashboard;
 
-GtkEntry *emailEntry;
-GtkEntry *passwordEntry;
-GtkLabel *messagesLabel;
-
 typedef struct {
 	GtkEntry *email;
 	GtkEntry *password;
 	GtkEntry *login;
+    GtkLabel *message_label;
 } sign_in_widgets;
 
 //sign_in_widgets *s_in_widgets = g_slice_new(sign_in_widgets);
@@ -58,6 +55,8 @@ void error(char *msg)
   exit(0);
 }
 
+sign_in_widgets *s_in_widgets;
+
 void *receiveFromServer(void *data)
 {
     int n;
@@ -76,6 +75,26 @@ void *receiveFromServer(void *data)
 
         printf("Action is %s\n", action);
 
+        if (strcmp(action, "sign-in")) {
+            json_object *payload = json_object_object_get(response, "payload");
+            json_object *successObj = json_object_object_get(payload, "success");
+            json_object *messageObj = json_object_object_get(payload, "message");
+            const int success = json_object_get_int(successObj);
+            const char *message = json_object_get_string(messageObj);
+            if (success == 1) {
+                json_object *me = json_object_object_get(payload, "me");
+                gtk_label_set_text(s_in_widgets->message_label, json_object_to_json_string(me));
+            } else if (success == 0) {
+                gtk_label_set_text(s_in_widgets->message_label, message);
+            }
+        } else if (strcmp(action, "sign-up")) {
+            json_object *payload = json_object_object_get(response, "payload");
+            json_object *successObj = json_object_object_get(payload, "success");
+            json_object *messageObj = json_object_object_get(payload, "message");
+            const int success = json_object_get_int(successObj);
+            const char *message = json_object_get_string(messageObj);
+        }
+
         printf("(Client) The message received: %s\n", json_object_to_json_string(response));
     }
 
@@ -88,7 +107,7 @@ int main(int argc, char *argv[])
     pthread_t tid_read;
 
     gtk_init(&argc, &argv);
-    sign_in_widgets *s_in_widgets = g_slice_new(sign_in_widgets);
+    s_in_widgets = g_slice_new(sign_in_widgets);
 
     if (argc != 3) {
         printf("Usage: %s server port\n", argv[0]);
@@ -129,7 +148,7 @@ int main(int argc, char *argv[])
     s_in_widgets->email  = GTK_WIDGET(gtk_builder_get_object(builder, "sign_in_input_email"));
     s_in_widgets->password  = GTK_WIDGET(gtk_builder_get_object(builder, "sign_in_input_password"));
     s_in_widgets->login  = GTK_WIDGET(gtk_builder_get_object(builder, "sign_in_button_login"));
-
+    s_in_widgets->message_label  = (GtkLabel *)GTK_WIDGET(gtk_builder_get_object(builder, "message_label"));
     
     gtk_builder_connect_signals(builder, s_in_widgets);
 
