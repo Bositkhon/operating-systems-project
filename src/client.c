@@ -23,9 +23,9 @@ GtkEntry *passwordEntry;
 GtkLabel *messagesLabel;
 
 typedef struct {
-	GtkWidget *email;
-	GtkWidget *password;
-	GtkWidget *login;
+	GtkEntry *email;
+	GtkEntry *password;
+	GtkEntry *login;
 } sign_in_widgets;
 
 //sign_in_widgets *s_in_widgets = g_slice_new(sign_in_widgets);
@@ -33,9 +33,10 @@ int sock;
 struct sockaddr_in server;
 struct hostent *hp;
 unsigned short port;
-gchar buffer[1024];
+gchar buffer[2048];
 
 json_object *request;
+json_object *response;
 
 void request_init()
 {
@@ -44,17 +45,24 @@ void request_init()
     json_object_object_add(request, "payload", NULL);
 }
 
+void response_init()
+{
+    response = json_object_new_object();
+    json_object_object_add(response, "action", NULL);
+    json_object_object_add(response, "payload", NULL);
+}
+
 void error(char *msg)
 {
   perror(msg);
   exit(0);
 }
 
-void *receiveFromServer (void *data)
+void *receiveFromServer(void *data)
 {
     int n;
     while (1) {
-        n = recv(sock, buffer, 1023, 0);
+        n = recv(sock, buffer, 2048, 0);
 
         if (n < 1) {
             error("Reading from socket");
@@ -62,8 +70,13 @@ void *receiveFromServer (void *data)
 
         buffer[n] = '\0';
 
-        // TODO: action on messaged received
-        printf("(Client) The message received: %s\n", buffer);
+        response = json_tokener_parse(buffer);
+
+        const char *action = json_object_get_string(json_object_object_get(response, "action"));
+
+        printf("Action is %s\n", action);
+
+        printf("(Client) The message received: %s\n", json_object_to_json_string(response));
     }
 
     return 0;
@@ -116,6 +129,7 @@ int main(int argc, char *argv[])
     s_in_widgets->email  = GTK_WIDGET(gtk_builder_get_object(builder, "sign_in_input_email"));
     s_in_widgets->password  = GTK_WIDGET(gtk_builder_get_object(builder, "sign_in_input_password"));
     s_in_widgets->login  = GTK_WIDGET(gtk_builder_get_object(builder, "sign_in_button_login"));
+
     
     gtk_builder_connect_signals(builder, s_in_widgets);
 
