@@ -14,7 +14,9 @@
 #include <json-c/json.h>
 
 GtkBuilder *builder; 
-GtkWidget *window;
+
+GtkWidget *window_user;
+GtkWidget *window_dashboard;
 
 GtkEntry *emailEntry;
 GtkEntry *passwordEntry;
@@ -119,19 +121,31 @@ int main(int argc, char *argv[])
     pthread_create(&tid_read, NULL, receiveFromServer, NULL);
 
     builder = gtk_builder_new();
-    gtk_builder_add_from_file (builder, "glade/user-page.glade", NULL);
+    gtk_builder_add_from_file (builder, "glade/main.glade", NULL);
 
+<<<<<<< HEAD
     window = GTK_WIDGET(gtk_builder_get_object(builder, "window_main"));
     s_in_widgets->email  = (GtkEntry *)GTK_WIDGET(gtk_builder_get_object(builder, "sign_in_input_email"));
     s_in_widgets->password  = (GtkEntry *)GTK_WIDGET(gtk_builder_get_object(builder, "sign_in_input_password"));
     s_in_widgets->login  = (GtkEntry *)GTK_WIDGET(gtk_builder_get_object(builder, "sign_in_button_login"));
+=======
+    window_user = GTK_WIDGET(gtk_builder_get_object(builder, "window_user"));
+    window_dashboard = GTK_WIDGET(gtk_builder_get_object(builder, "window_dashboard"));
+    
+    s_in_widgets->email  = GTK_WIDGET(gtk_builder_get_object(builder, "sign_in_input_email"));
+    s_in_widgets->password  = GTK_WIDGET(gtk_builder_get_object(builder, "sign_in_input_password"));
+    s_in_widgets->login  = GTK_WIDGET(gtk_builder_get_object(builder, "sign_in_button_login"));
+>>>>>>> origin/shukur
     
     gtk_builder_connect_signals(builder, s_in_widgets);
 
 
     g_object_unref(builder);
-
-    gtk_widget_show(window);   
+    
+    
+    gtk_widget_show(window_user);
+    //gtk_widget_hide(window_dashboard);
+     
 
     gtk_main();
     g_slice_free(sign_in_widgets, s_in_widgets);
@@ -144,6 +158,16 @@ void on_window_main_destroy()
     send(sock, "e", 1, 0);
     gtk_main_quit();
 }
+
+void on_go_dash_clicked(){
+gtk_widget_hide(window_user);
+    gtk_widget_show(window_dashboard);
+}
+void on_go_user_clicked(){
+gtk_widget_show(window_user);
+    gtk_widget_hide(window_dashboard);
+}
+
 
 void on_sign_in_button_login_clicked(GtkButton *button, sign_in_widgets *widgets)
 {
