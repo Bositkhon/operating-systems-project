@@ -129,7 +129,15 @@ void signUp(
 
 			replyToClientWithMessage((void *)(long)data, request);
 		} else {
-			sprintf(test_query,"insert into users (email, password, first_name, last_name, gender, phone, birth_date, passport_serial, passport_number) values ('%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s')", email, password, first_name, last_name, gender, phone, birth_date, passport_serial, passport_number); 
+			sprintf(test_query,"insert into users (email, password, first_name, last_name, gender, phone, birth_date, passport_serial, passport_number) values ('%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s')", email, password, first_name, last_name, gender, phone, birth_date, passport_serial, passport_number);
+			mysql_query(connection, test_query);
+			
+			json_object *payload = json_object_new_object();
+			json_object_object_add(payload, "success", json_object_new_int(1));
+			json_object_object_add(payload, "message", json_object_new_string("You have successfully registered"));
+			json_object_object_add(request, "payload", payload);
+
+			replyToClientWithMessage((void *)(long)data, request);
 			// signIn((void *)(long)data, email, password);
 		}
 }
