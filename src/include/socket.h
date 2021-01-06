@@ -114,11 +114,11 @@ void dispatchAction(const char *action, void *data)
 		const char *last_name = json_object_get_string(json_object_object_get(payload, "last_name"));
 		const char *gender = json_object_get_string(json_object_object_get(payload, "gender"));
 		const char *phone = json_object_get_string(json_object_object_get(payload, "phone"));
-		const char *birth_day = json_object_get_string(json_object_object_get(payload, "birth_day"));
+		const char *birth_date = json_object_get_string(json_object_object_get(payload, "birth_date"));
 		const char *passport_serial = json_object_get_string(json_object_object_get(payload, "passport_serial"));
 		const char *passport_number = json_object_get_string(json_object_object_get(payload, "passport_number"));
 
-		signUp((void *)(long)data, email, password, first_name, last_name, gender, phone, birth_day, passport_serial, passport_number);
+		signUp((void *)(long)data, email, password, first_name, last_name, gender, phone, birth_date, passport_serial, passport_number);
 	}
 }
 
