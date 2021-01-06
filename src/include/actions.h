@@ -59,7 +59,7 @@ void signIn(void *data, const char *email, const char *password)
 {
 	char test_query[256];
 		
-	sprintf(test_query, "select * from user where email='%s' and password='%s'", email, password); 
+	sprintf(test_query, "select * from users where email='%s' and password='%s'", email, password); 
 	printf("\n%s\n", test_query);
 	mysql_query(connection, test_query);
 
@@ -170,5 +170,267 @@ int validation(const char *email)
 
 	return return_value;
 }
+
+
+
+
+//
+//Actions with Bokings
+//
+
+json_object* bookTicket(void *data, int user_id, int schedule_id){
+
+	char test_query[256];
+	json_object *request = json_object_new_object();
+	json_object_object_add(request, "action", json_object_new_string("booked-ticked"));	
+	
+	sprintf(test_query, 
+			"insert into bookings (user_id, schedul_id) values ('%d', '%d')", 
+			user_id, schedule_id); 
+
+	mysql_query(connection, test_query);// Querry execution
+	json_object_object_add(request, "schedule_id", json_object_new_int(schedule_id));
+	replyToAllClientsWithIncomingMessage(request);
+	json_object_object_add(request, "user_id", json_object_new_int(user_id));	
+	
+	//replyToClientWithMessage((void *)(long)data, request);
+	mysql_free_result(result);
+	return request;
+
+}
+
+
+json_object* getAllBookings(void *data){
+
+	char test_query[256];
+	json_object *request = json_object_new_object();
+	json_object_object_add(request, "action", json_object_new_string("get-all-bookings"));	
+	json_object *list_of_bookings = json_object_new_array();
+	sprintf(test_query, 
+			"select * from bookings natural join users join schedules where bookings.schedule_id = schedule.id"); 
+
+	mysql_query(connection, test_query);// Querry execution
+	while ((row = mysql_fetch_row(result)) != NULL){ 
+		json_object *bookings = json_object_new_object();
+		json_object_object_add(bookings, "booking_id", json_object_new_int(atoi(row[0])));
+		json_object_object_add(bookings, "user_id", json_object_new_int(atoi(row[1])));
+		json_object_object_add(bookings, "schedule_id", json_object_new_int(atoi(row[2])));
+		json_object_object_add(bookings, "email", json_object_new_string(row[3]));
+		json_object_object_add(bookings, "first_name", json_object_new_string(row[5]));
+		json_object_object_add(bookings, "last_name", json_object_new_string(row[6]));
+		json_object_object_add(bookings, "passport_serie", json_object_new_string(row[11]));
+		json_object_object_add(bookings, "passport_number", json_object_new_string(row[12]));
+		 json_object_array_add(list_of_bookings, bookings);
+	}
+	json_object_object_add(request, "result", list_of_bookings);
+//	replyToClientWithMessage((void *)(long)data, request);
+	mysql_free_result(result);
+	return request;
+
+}
+
+json_object* deleteBookings(void *data, int user_id, int schedule_id){
+
+	char test_query[256];
+	json_object *request = json_object_new_object();
+	json_object_object_add(request, "action", json_object_new_string("delete-bookings"));	
+	
+	if(user_id != 0 && schedule_id == 0)
+		sprintf(test_query, 
+				"delete from bookings where user_id='%d", 
+				user_id); 
+	
+	else if(user_id == 0 && schedule_id != 0)
+		sprintf(test_query, 
+				"delete from bookings where schedule_id='%d", 
+				schedule_id);
+
+	else if(user_id != 0 && schedule_id != 0)
+		sprintf(test_query, 
+				"delete from bookings where user_id='%d' and schedule_id='%d'", 
+				user_id, schedule_id);
+
+	mysql_query(connection, test_query);// Querry execution
+	json_object_object_add(request, "schedule_id", json_object_new_int(schedule_id));
+	replyToAllClientsWithIncomingMessage(request);
+	json_object_object_add(request, "user_id", json_object_new_int(user_id));	
+	
+	//replyToClientWithMessage((void *)(long)data, request);
+	mysql_free_result(result);
+	return request;
+
+}
+
+//
+//Actions with trains
+//
+
+json_object* addTrain(void *data, char *name, int quantity_carriage, int quantity_seats, double rate_per_km, double avg_speed){
+
+	char test_query[256];
+	json_object *request = json_object_new_object();
+	json_object_object_add(request, "action", json_object_new_string("add-train"));	
+	
+	sprintf(test_query, 
+			"insert into bookings (name, quantity_carriage, quantity_seats, rate_per_km, avg_speed) values ('%s', '%d', '%d', '%lf', '%lf')", 
+			 name, quantity_carriage, quantity_seats, rate_per_km, avg_speed); 
+
+	mysql_query(connection, test_query);// Querry execution
+	json_object_object_add(request, "train-name", json_object_new_string(name));
+	
+//	replyToClientWithMessage((void *)(long)data, request);
+	mysql_free_result(result);
+	return request;
+}
+
+json_object* updateTrain(void *data, char *name, int quantity_carriage, int quantity_seats, double rate_per_km, double avg_speed){
+
+	char test_query[256];
+	json_object *request = json_object_new_object();
+	json_object_object_add(request, "action", json_object_new_string("update-train"));	
+	
+	sprintf(test_query, 
+			"update bookings set (name, quantity_carriage, quantity_seats, rate_per_km, avg_speed) values ('%s', '%d', '%d', '%lf', '%lf')", 
+			 name, quantity_carriage, quantity_seats, rate_per_km, avg_speed); 
+
+	mysql_query(connection, test_query);// Querry execution
+	json_object_object_add(request, "train-name", json_object_new_string(name));
+	
+//	replyToClientWithMessage((void *)(long)data, request);
+	mysql_free_result(result);
+	return request;
+}
+
+json_object* getAllTrains(void *data){
+
+	char test_query[256];
+	json_object *request = json_object_new_object();
+	json_object_object_add(request, "action", json_object_new_string("get-all-trains"));	
+	json_object *list_of_trains = json_object_new_array();
+	sprintf(test_query, 
+			"select * from trains"); 
+
+	mysql_query(connection, test_query);// Querry execution
+	while ((row = mysql_fetch_row(result)) != NULL){ 
+		char* ptr;
+		json_object *trains = json_object_new_object();
+		json_object_object_add(trains, "train_id", json_object_new_int(atoi(row[0])));
+		json_object_object_add(trains, "name", json_object_new_int(atoi(row[1])));
+		json_object_object_add(trains, "quantity_carriage", json_object_new_int(atoi(row[2])));
+		json_object_object_add(trains, "quantity_seats", json_object_new_int(atoi(row[3])));
+		json_object_object_add(trains, "rate_per_km", json_object_new_double(strtod(row[5], ptr)));
+		json_object_object_add(trains, "avg_speed", json_object_new_double(strtod(row[6], ptr)));
+		json_object_array_add(list_of_trains, trains);
+	}
+	json_object_object_add(request, "result", list_of_trains);
+//	replyToClientWithMessage((void *)(long)data, request);
+	mysql_free_result(result);
+	return request;
+
+}
+
+json_object* getTrain(void *data, int train_id){
+
+	char test_query[256];
+	json_object *request = json_object_new_object();
+	json_object_object_add(request, "action", json_object_new_string("get-all-trains"));	
+	sprintf(test_query, 
+			"select * from trains where id = '%d'", train_id); 
+
+	mysql_query(connection, test_query);// Querry execution
+
+	char* ptr;
+	json_object *train = json_object_new_object();
+	json_object_object_add(train, "train_id", json_object_new_int(atoi(row[0])));
+	json_object_object_add(train, "name", json_object_new_int(atoi(row[1])));
+	json_object_object_add(train, "quantity_carriage", json_object_new_int(atoi(row[2])));
+	json_object_object_add(train, "quantity_seats", json_object_new_int(atoi(row[3])));
+	json_object_object_add(train, "rate_per_km", json_object_new_double(strtod(row[5], ptr)));
+	json_object_object_add(train, "avg_speed", json_object_new_double(strtod(row[6], ptr)));
+
+	json_object_object_add(request, "result", train);
+//	replyToClientWithMessage((void *)(long)data, request);
+	mysql_free_result(result);
+	return request;
+
+}
+
+json_object* deleteTrain(void *data, int train_id){
+
+	char test_query[256];
+	json_object *request = json_object_new_object();
+	json_object_object_add(request, "action", json_object_new_string("delete-train"));	
+	
+		sprintf(test_query, 
+				"delete from trains where id='%d", 
+				train_id); 
+	
+	mysql_query(connection, test_query);// Querry execution
+	json_object_object_add(request, "train_id", json_object_new_int(train_id));
+	
+	//replyToClientWithMessage((void *)(long)data, request);
+	mysql_free_result(result);
+	return request;
+}
+
+//
+//Actions with wallets
+//
+
+json_object* addWallet(void *data, int user_id, double balance){
+
+	char test_query[256];
+	json_object *request = json_object_new_object();
+	json_object_object_add(request, "action", json_object_new_string("add-wallet"));	
+	
+	sprintf(test_query, 
+			"insert into wallets (user_id, balance) values ('%d', '%lf')", 
+			 user_id, balance); 
+
+	mysql_query(connection, test_query);// Querry execution
+	json_object_object_add(request, "user_id", json_object_new_int(user_id));
+	
+//	replyToClientWithMessage((void *)(long)data, request);
+	mysql_free_result(result);
+	return request;
+}
+
+json_object* updateWallet(void *data, int user_id, double balance){
+
+	char test_query[256];
+	json_object *request = json_object_new_object();
+	json_object_object_add(request, "action", json_object_new_string("update-wallet"));	
+	
+	sprintf(test_query, 
+			"update wallets set balance = '%lf' where user_id = '%d'", 
+			 balance, user_id); 
+
+	mysql_query(connection, test_query);// Querry execution
+	json_object_object_add(request, "user_id", json_object_new_int(user_id));
+	
+//	replyToClientWithMessage((void *)(long)data, request);
+	mysql_free_result(result);
+	return request;
+}
+
+json_object* deleteWallet(void *data, int user_id){
+
+	char test_query[256];
+	json_object *request = json_object_new_object();
+	json_object_object_add(request, "action", json_object_new_string("delete-wallet"));	
+	
+		sprintf(test_query, 
+				"delete from wallets where user_id='%d", 
+				user_id); 
+	
+	mysql_query(connection, test_query);// Querry execution
+	json_object_object_add(request, "user_id", json_object_new_int(user_id));
+	
+	//replyToClientWithMessage((void *)(long)data, request);
+	mysql_free_result(result);
+	return request;
+}
+
+
 
 #endif // ACTIONS_H

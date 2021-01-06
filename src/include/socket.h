@@ -83,13 +83,14 @@ void *service_read(void *data)
 			clientfd_set[i] = 0; // удаляем дескриптор
 			pthread_exit(0); // заканчиваем тред процесс
 		}
-
+		
 		response = json_tokener_parse(buffer);
-
+		printf("(Server) Received message: %s\n", json_object_to_json_string(response)); // выводим в консоли сообщение 
+	
 		const char *action = json_object_get_string(json_object_object_get(response, "action"));
 		dispatchAction(action, (void *)(long) clientfd);
 
-		printf("(Server) Received message: %s\n", json_object_to_json_string(response)); // выводим в консоли сообщение 
+
 		// fflush(stdout);
 		//replyToClientWithMessage((void *)(long) clientfd, "This is my text");
 		// replyToAllClientsWithIncomingMessage((void *)(long) clientfd); // этот метод доставляет сообщение полученное от любого клиента всем клиентам

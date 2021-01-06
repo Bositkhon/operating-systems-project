@@ -6,9 +6,9 @@
 #include <mysql/mysql.h>
 
 #define DB_SERVER "localhost"
-#define DB_USER "bositkhon"
-#define DB_PASSWORD "bosit4me"
-#define DB_NAME "test"
+#define DB_USER "root"
+#define DB_PASSWORD "password"
+#define DB_NAME "TestDb"
 
 MYSQL *connection;
 MYSQL_RES *result;

@@ -2,6 +2,7 @@
 # SERVER - gcc -o server server.c -lpthread `mysql_config --cflags --libs`
 # change application name here (executable output name)
 TARGETCLIENT=client
+TARGETTREE=tree
 TARGETSERVER=server
 PORT=9999
 HOST=127.0.0.1
@@ -26,3 +27,5 @@ runserver: server
 	./server $(PORT)
 clean:
 	rm -f *.o $(TARGETCLIENT) $(TARGETSERVER)
+tree_test: src/tree_test.c
+	gcc -o $(TARGETTREE) src/tree_test.c -Wall $(GTK) ${JSON}
