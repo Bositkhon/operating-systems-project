@@ -8,7 +8,7 @@
 #define DB_SERVER "localhost"
 #define DB_USER "bositkhon"
 #define DB_PASSWORD "bosit4me"
-#define DB_NAME "test"
+#define DB_NAME "railway"
 
 MYSQL *connection;
 MYSQL_RES *result;

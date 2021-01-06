@@ -14,16 +14,31 @@
 #include <json-c/json.h>
 
 GtkBuilder *builder; 
-GtkWidget *window;
 
-typedef struct {
+GtkWidget *window_user;
+GtkWidget *window_dashboard;
+
+typedef struct{
 	GtkEntry *email;
 	GtkEntry *password;
-	GtkEntry *login;
-    GtkLabel *message_label;
+	GtkButton *login;
 } sign_in_widgets;
 
-//sign_in_widgets *s_in_widgets = g_slice_new(sign_in_widgets);
+typedef struct{
+    GtkEntry *email;
+	GtkEntry *password;
+	GtkEntry *firstname;
+    GtkEntry *lastname;
+    GtkEntry *phone;
+    gchar *gender;
+    GtkEntry *birth_date;
+    GtkEntry *passport_serial;
+    GtkEntry *passport_number;
+} sign_up_widgets;
+
+sign_in_widgets *s_in_widgets;
+sign_up_widgets *s_up_widgets;
+
 int sock;
 struct sockaddr_in server;
 struct hostent *hp;
@@ -53,7 +68,6 @@ void error(char *msg)
   exit(0);
 }
 
-sign_in_widgets *s_in_widgets;
 
 void *receiveFromServer(void *data)
 {
@@ -64,33 +78,29 @@ void *receiveFromServer(void *data)
         if (n < 1) {
             error("Reading from socket");
         }
-
         buffer[n] = '\0';
-
         response = json_tokener_parse(buffer);
 
         const char *action = json_object_get_string(json_object_object_get(response, "action"));
 
-        printf("Action is %s\n", action);
-
         if (strcmp(action, "sign-in")) {
             json_object *payload = json_object_object_get(response, "payload");
-            json_object *successObj = json_object_object_get(payload, "success");
-            json_object *messageObj = json_object_object_get(payload, "message");
-            const int success = json_object_get_int(successObj);
-            const char *message = json_object_get_string(messageObj);
-            if (success == 1) {
-                json_object *me = json_object_object_get(payload, "me");
-                gtk_label_set_text(s_in_widgets->message_label, json_object_to_json_string(me));
-            } else if (success == 0) {
-                gtk_label_set_text(s_in_widgets->message_label, message);
+
+            const int success = json_object_get_int(json_object_object_get(payload, "success"));
+            // const char *message = json_object_get_string(json_object_object_get(payload, "message"));
+
+            if (success) {
+                // TODO: on success
+                // json_object *me = json_object_object_get(payload, "me");
+               // gtk_label_set_text(s_in_widgets->message_label, json_object_to_json_string(me));
+            } else {
+                // TODO: on fail
+               // gtk_label_set_text(s_in_widgets->message_label, message);
             }
         } else if (strcmp(action, "sign-up")) {
-            json_object *payload = json_object_object_get(response, "payload");
-            json_object *successObj = json_object_object_get(payload, "success");
-            json_object *messageObj = json_object_object_get(payload, "message");
-            const int success = json_object_get_int(successObj);
-            const char *message = json_object_get_string(messageObj);
+            // json_object *payload = json_object_object_get(response, "payload");
+            // const int success = json_object_get_int(json_object_object_get(payload, "success"));
+            // const char *message = json_object_get_string(json_object_object_get(payload, "message"));
         }
 
         printf("(Client) The message received: %s\n", json_object_to_json_string(response));
@@ -106,6 +116,7 @@ int main(int argc, char *argv[])
 
     gtk_init(&argc, &argv);
     s_in_widgets = g_slice_new(sign_in_widgets);
+    s_up_widgets = g_slice_new(sign_up_widgets);
 
     if (argc != 3) {
         printf("Usage: %s server port\n", argv[0]);
@@ -138,39 +149,62 @@ int main(int argc, char *argv[])
     pthread_create(&tid_read, NULL, receiveFromServer, NULL);
 
     builder = gtk_builder_new();
-    gtk_builder_add_from_file (builder, "glade/user-page.glade", NULL);
+    gtk_builder_add_from_file (builder, "glade/main.glade", NULL);
 
-    window = GTK_WIDGET(gtk_builder_get_object(builder, "window_main"));
+    window_user = GTK_WIDGET(gtk_builder_get_object(builder, "window_user"));
+    window_dashboard = GTK_WIDGET(gtk_builder_get_object(builder, "window_dashboard"));
     
-    s_in_widgets->email  = (GtkEntry *)GTK_WIDGET(gtk_builder_get_object(builder, "sign_in_input_email"));
+    s_in_widgets->email = (GtkEntry *)GTK_WIDGET(gtk_builder_get_object(builder, "sign_in_input_email"));
+   
     s_in_widgets->password  = (GtkEntry *)GTK_WIDGET(gtk_builder_get_object(builder, "sign_in_input_password"));
-    s_in_widgets->login  = (GtkEntry *)GTK_WIDGET(gtk_builder_get_object(builder, "sign_in_button_login"));
-    s_in_widgets->message_label  = (GtkLabel *)GTK_WIDGET(gtk_builder_get_object(builder, "message_label"));
+    s_in_widgets->login  = (GtkButton *)GTK_WIDGET(gtk_builder_get_object(builder, "sign_in_button_login"));
     
-    gtk_builder_connect_signals(builder, s_in_widgets);
+    s_up_widgets->email  = (GtkEntry *)GTK_WIDGET(gtk_builder_get_object(builder, "sign_up_input_email"));
+    s_up_widgets->password  = (GtkEntry *)GTK_WIDGET(gtk_builder_get_object(builder, "sign_up_input_password"));
+    s_up_widgets->firstname  = (GtkEntry *)GTK_WIDGET(gtk_builder_get_object(builder, "sign_up_input_firstname"));
+    s_up_widgets->lastname  = (GtkEntry *)GTK_WIDGET(gtk_builder_get_object(builder, "sign_up_input_lastname"));
+    s_up_widgets->phone  = (GtkEntry *)GTK_WIDGET(gtk_builder_get_object(builder, "sign_up_input_phone"));
+    s_up_widgets->gender  = "male";
+    s_up_widgets->birth_date  = (GtkEntry *)GTK_WIDGET(gtk_builder_get_object(builder, "sign_up_input_birth_date"));
+    s_up_widgets->passport_serial  = (GtkEntry *)GTK_WIDGET(gtk_builder_get_object(builder, "sign_up_input_passport_serial"));
+    s_up_widgets->passport_number  = (GtkEntry *)GTK_WIDGET(gtk_builder_get_object(builder, "sign_up_input_passport_number"));
+    
+    gtk_builder_connect_signals(builder, NULL);
 
 
     g_object_unref(builder);
-
-    gtk_widget_show(window);   
+    
+    
+    gtk_widget_show(window_user);
+     
 
     gtk_main();
     g_slice_free(sign_in_widgets, s_in_widgets);
+    g_slice_free(sign_up_widgets, s_up_widgets);
 
     return 0;
 }
 
-void on_window_main_destroy()
+void on_window_user_destroy()
 {
     send(sock, "e", 1, 0);
     gtk_main_quit();
 }
+void on_window_dashboard_destroy()
+{
+    send(sock, "e", 1, 0);
+    gtk_main_quit();
+}
+void changeWindow(GtkWidget *window_current, GtkWidget *window_to){
+	gtk_widget_hide(window_current);
+	gtk_widget_show(window_to);
+}
 
-void on_sign_in_button_login_clicked(GtkButton *button, sign_in_widgets *widgets)
+void on_sign_in_button_login_clicked(GtkButton *button)
 {
 
-    const gchar *email = gtk_entry_get_text(widgets->email);
-    const gchar *password = gtk_entry_get_text(widgets->password);
+    const gchar *email = gtk_entry_get_text(s_in_widgets->email);
+    const gchar *password = gtk_entry_get_text(s_in_widgets->password);
 
     json_object *signInString = json_object_new_string("sign-in");
     json_object *emailString = json_object_new_string(email);
@@ -197,10 +231,25 @@ void on_sign_in_button_login_clicked(GtkButton *button, sign_in_widgets *widgets
     }
 }
 
-void on_sign_up_button_register_clicked()
+void on_sign_up_button_register_clicked(GtkButton *button)
 {
     json_object *signInString = json_object_new_string("sign-up");
     json_object_object_add(request, "action", signInString);
+    
+    json_object *payload = json_object_new_object();
+    json_object_object_add(payload, "email", json_object_new_string(gtk_entry_get_text(s_up_widgets->email)));
+    
+    json_object_object_add(payload, "password", json_object_new_string(gtk_entry_get_text(s_up_widgets->password)));
+    json_object_object_add(payload, "first_name", json_object_new_string(gtk_entry_get_text(s_up_widgets->firstname)));
+    json_object_object_add(payload, "last_name", json_object_new_string(gtk_entry_get_text(s_up_widgets->lastname)));
+    json_object_object_add(payload, "phone", json_object_new_string(gtk_entry_get_text(s_up_widgets->phone)));
+    json_object_object_add(payload, "gender", json_object_new_string(s_up_widgets->gender));
+    json_object_object_add(payload, "birth_date", json_object_new_string(gtk_entry_get_text(s_up_widgets->birth_date)));
+    json_object_object_add(payload, "passport_serial", json_object_new_string(gtk_entry_get_text(s_up_widgets->passport_serial)));
+    json_object_object_add(payload, "passport_number", json_object_new_string(gtk_entry_get_text(s_up_widgets->passport_number)));
+    
+    
+    json_object_object_add(request, "payload", payload);
 
     char temp_buff[100000];
 
@@ -213,5 +262,14 @@ void on_sign_up_button_register_clicked()
     {
         perror("write");
     }
+}
+
+void on_sign_up_gender_female_toggled(GtkRadioButton *r_btn){
+	gboolean T = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(r_btn));
+	if(T) s_up_widgets->gender = "female";
+}
+void on_sign_up_gender_male_toggled(GtkRadioButton *r_btn){
+	gboolean T = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(r_btn));
+	if(T) s_up_widgets->gender = "male";
 }
 

@@ -1,10 +1,134 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Generated with glade 3.22.2 -->
+<!-- Generated with glade 3.22.1 -->
 <interface>
   <requires lib="gtk+" version="3.20"/>
-  <object class="GtkWindow" id="window_main">
+  <object class="GtkWindow" id="window_dashboard">
     <property name="can_focus">False</property>
-    <signal name="destroy" handler="on_window_main_destroy" swapped="no"/>
+    <signal name="destroy" handler="on_window_dashboard_destroy" swapped="no"/>
+    <child type="titlebar">
+      <placeholder/>
+    </child>
+    <child>
+      <object class="GtkFixed">
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+        <child>
+          <object class="GtkBox">
+            <property name="width_request">667</property>
+            <property name="visible">True</property>
+            <property name="can_focus">False</property>
+            <property name="margin_left">20</property>
+            <property name="margin_right">20</property>
+            <property name="margin_top">5</property>
+            <property name="margin_bottom">5</property>
+            <property name="orientation">vertical</property>
+            <child>
+              <object class="GtkGrid">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <property name="column_homogeneous">True</property>
+                <child>
+                  <object class="GtkStackSwitcher" id="dasboard_switchers">
+                    <property name="visible">True</property>
+                    <property name="can_focus">False</property>
+                    <property name="halign">start</property>
+                    <property name="stack">dasboard_stack</property>
+                  </object>
+                  <packing>
+                    <property name="left_attach">0</property>
+                    <property name="top_attach">0</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkButton" id="dashboard_button_logout">
+                    <property name="label" translatable="yes">Log out</property>
+                    <property name="visible">True</property>
+                    <property name="can_focus">True</property>
+                    <property name="receives_default">True</property>
+                    <property name="halign">end</property>
+                  </object>
+                  <packing>
+                    <property name="left_attach">1</property>
+                    <property name="top_attach">0</property>
+                  </packing>
+                </child>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">True</property>
+                <property name="position">0</property>
+              </packing>
+            </child>
+          </object>
+        </child>
+        <child>
+          <object class="GtkStack" id="dasboard_stack">
+            <property name="width_request">667</property>
+            <property name="height_request">397</property>
+            <property name="visible">True</property>
+            <property name="can_focus">False</property>
+            <property name="margin_left">20</property>
+            <property name="margin_right">20</property>
+            <property name="margin_top">20</property>
+            <property name="margin_bottom">20</property>
+            <child>
+              <object class="GtkFixed" id="dashboard_stack_dashboard">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <child>
+                  <object class="GtkButton" id="go_user">
+                    <property name="label" translatable="yes">Go user</property>
+                    <property name="width_request">100</property>
+                    <property name="height_request">80</property>
+                    <property name="visible">True</property>
+                    <property name="can_focus">True</property>
+                    <property name="receives_default">True</property>
+                    <signal name="clicked" handler="on_go_user_clicked" swapped="no"/>
+                  </object>
+                  <packing>
+                    <property name="x">232</property>
+                    <property name="y">63</property>
+                  </packing>
+                </child>
+              </object>
+              <packing>
+                <property name="name">page0</property>
+                <property name="title" translatable="yes">Dashboard</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkFixed" id="dashboard_stack_account">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+              </object>
+              <packing>
+                <property name="name">page1</property>
+                <property name="title" translatable="yes">Account</property>
+                <property name="position">1</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkFixed" id="dashboard_stack_feedback">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+              </object>
+              <packing>
+                <property name="name">page2</property>
+                <property name="title" translatable="yes">Feedback</property>
+                <property name="position">2</property>
+              </packing>
+            </child>
+          </object>
+          <packing>
+            <property name="y">67</property>
+          </packing>
+        </child>
+      </object>
+    </child>
+  </object>
+  <object class="GtkWindow" id="window_user">
+    <property name="can_focus">False</property>
+    <signal name="destroy" handler="on_window_user_destroy" swapped="no"/>
     <child type="titlebar">
       <placeholder/>
     </child>
@@ -69,7 +193,7 @@
                 <child>
                   <object class="GtkBox">
                     <property name="width_request">674</property>
-                    <property name="height_request">351</property>
+                    <property name="height_request">176</property>
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
                     <property name="homogeneous">True</property>
@@ -122,7 +246,7 @@
                             <property name="visible">True</property>
                             <property name="can_focus">True</property>
                             <property name="visibility">False</property>
-                            <property name="invisible_char">*</property>
+                            <property name="invisible_char">•</property>
                           </object>
                           <packing>
                             <property name="left_attach">1</property>
@@ -157,14 +281,18 @@
                   </object>
                 </child>
                 <child>
-                  <object class="GtkLabel" id="message_label">
-                    <property name="width_request">240</property>
+                  <object class="GtkButton" id="go_dash">
+                    <property name="label" translatable="yes">Go dash</property>
+                    <property name="width_request">100</property>
+                    <property name="height_request">80</property>
                     <property name="visible">True</property>
-                    <property name="can_focus">False</property>
+                    <property name="can_focus">True</property>
+                    <property name="receives_default">True</property>
+                    <signal name="clicked" handler="on_go_dash_clicked" swapped="no"/>
                   </object>
                   <packing>
-                    <property name="x">217</property>
-                    <property name="y">162</property>
+                    <property name="x">230</property>
+                    <property name="y">235</property>
                   </packing>
                 </child>
               </object>
@@ -234,7 +362,7 @@
                             <property name="visible">True</property>
                             <property name="can_focus">True</property>
                             <property name="visibility">False</property>
-                            <property name="invisible_char">*</property>
+                            <property name="invisible_char">•</property>
                           </object>
                           <packing>
                             <property name="left_attach">1</property>
@@ -411,7 +539,6 @@
                                 <property name="visible">True</property>
                                 <property name="can_focus">True</property>
                                 <property name="receives_default">False</property>
-                                <property name="active">True</property>
                                 <property name="draw_indicator">True</property>
                                 <property name="group">sign_up_gender</property>
                               </object>
@@ -433,6 +560,7 @@
                             <property name="can_focus">True</property>
                             <property name="receives_default">True</property>
                             <property name="halign">end</property>
+                            <signal name="clicked" handler="on_sign_up_button_register_clicked" swapped="no"/>
                           </object>
                           <packing>
                             <property name="left_attach">1</property>
