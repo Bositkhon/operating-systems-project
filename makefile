@@ -14,7 +14,7 @@ GTK=`pkg-config --cflags --libs gtk+-3.0` -export-dynamic
 MYSQL=`mysql_config --cflags --libs`
 JSON=-l json-c
 
-all: server client
+all: clean server client
 
 client: src/client.c
 	gcc -o $(TARGETCLIENT) src/client.c -Wall $(GTK) ${JSON}

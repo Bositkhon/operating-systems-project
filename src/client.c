@@ -18,10 +18,12 @@ GtkBuilder *builder;
 GtkWidget *window_user;
 GtkWidget *window_dashboard;
 
+
 typedef struct{
 	GtkEntry *email;
 	GtkEntry *password;
 	GtkButton *login;
+	GtkLabel *message
 } sign_in_widgets;
 
 typedef struct{
@@ -36,8 +38,13 @@ typedef struct{
     GtkEntry *passport_number;
 } sign_up_widgets;
 
+typedef struct {
+	GtkButton *button_logout;
+} dashboard_widgets;
+
 sign_in_widgets *s_in_widgets;
 sign_up_widgets *s_up_widgets;
+dashboard_widgets *d_widgets;
 
 int sock;
 struct sockaddr_in server;
@@ -88,14 +95,15 @@ void *receiveFromServer(void *data)
 
             const int success = json_object_get_int(json_object_object_get(payload, "success"));
             // const char *message = json_object_get_string(json_object_object_get(payload, "message"));
-
+         
             if (success) {
                 // TODO: on success
-                // json_object *me = json_object_object_get(payload, "me");
-               // gtk_label_set_text(s_in_widgets->message_label, json_object_to_json_string(me));
+                gtk_widget_hide(window_user);
+					 gtk_widget_show(window_dashboard);
             } else {
                 // TODO: on fail
-               // gtk_label_set_text(s_in_widgets->message_label, message);
+                json_object *message = json_object_object_get(payload, "message");
+                gtk_label_set_text(s_in_widgets->message, json_object_get_string(message));
             }
         } else if (strcmp(action, "sign-up")) {
             // json_object *payload = json_object_object_get(response, "payload");
@@ -117,6 +125,8 @@ int main(int argc, char *argv[])
     gtk_init(&argc, &argv);
     s_in_widgets = g_slice_new(sign_in_widgets);
     s_up_widgets = g_slice_new(sign_up_widgets);
+    d_widgets = g_slice_new(dashboard_widgets);
+    
 
     if (argc != 3) {
         printf("Usage: %s server port\n", argv[0]);
@@ -155,7 +165,7 @@ int main(int argc, char *argv[])
     window_dashboard = GTK_WIDGET(gtk_builder_get_object(builder, "window_dashboard"));
     
     s_in_widgets->email = (GtkEntry *)GTK_WIDGET(gtk_builder_get_object(builder, "sign_in_input_email"));
-   
+    s_in_widgets->message = (GtkLabel *)GTK_WIDGET(gtk_builder_get_object(builder, "sign_in_label_message"));
     s_in_widgets->password  = (GtkEntry *)GTK_WIDGET(gtk_builder_get_object(builder, "sign_in_input_password"));
     s_in_widgets->login  = (GtkButton *)GTK_WIDGET(gtk_builder_get_object(builder, "sign_in_button_login"));
     
@@ -169,6 +179,9 @@ int main(int argc, char *argv[])
     s_up_widgets->passport_serial  = (GtkEntry *)GTK_WIDGET(gtk_builder_get_object(builder, "sign_up_input_passport_serial"));
     s_up_widgets->passport_number  = (GtkEntry *)GTK_WIDGET(gtk_builder_get_object(builder, "sign_up_input_passport_number"));
     
+    d_widgets->button_logout = (GtkButton *)GTK_WIDGET(gtk_builder_get_object(builder, "dashboard_button_logout"));
+    
+    
     gtk_builder_connect_signals(builder, NULL);
 
 
@@ -181,7 +194,8 @@ int main(int argc, char *argv[])
     gtk_main();
     g_slice_free(sign_in_widgets, s_in_widgets);
     g_slice_free(sign_up_widgets, s_up_widgets);
-
+    g_slice_free(dashboard_widgets, d_widgets);
+     
     return 0;
 }
 
@@ -194,10 +208,6 @@ void on_window_dashboard_destroy()
 {
     send(sock, "e", 1, 0);
     gtk_main_quit();
-}
-void changeWindow(GtkWidget *window_current, GtkWidget *window_to){
-	gtk_widget_hide(window_current);
-	gtk_widget_show(window_to);
 }
 
 void on_sign_in_button_login_clicked(GtkButton *button)
@@ -262,6 +272,11 @@ void on_sign_up_button_register_clicked(GtkButton *button)
     {
         perror("write");
     }
+}
+
+void on_dashboard_button_logout_clicked(){
+		gtk_widget_hide(window_dashboard);
+		gtk_widget_show(window_user);
 }
 
 void on_sign_up_gender_female_toggled(GtkRadioButton *r_btn){

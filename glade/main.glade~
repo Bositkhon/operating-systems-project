@@ -3,6 +3,8 @@
 <interface>
   <requires lib="gtk+" version="3.20"/>
   <object class="GtkWindow" id="window_dashboard">
+    <property name="width_request">600</property>
+    <property name="height_request">600</property>
     <property name="can_focus">False</property>
     <signal name="destroy" handler="on_window_dashboard_destroy" swapped="no"/>
     <child type="titlebar">
@@ -75,21 +77,6 @@
               <object class="GtkFixed" id="dashboard_stack_dashboard">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
-                <child>
-                  <object class="GtkButton" id="go_user">
-                    <property name="label" translatable="yes">Go user</property>
-                    <property name="width_request">100</property>
-                    <property name="height_request">80</property>
-                    <property name="visible">True</property>
-                    <property name="can_focus">True</property>
-                    <property name="receives_default">True</property>
-                    <signal name="clicked" handler="on_go_user_clicked" swapped="no"/>
-                  </object>
-                  <packing>
-                    <property name="x">232</property>
-                    <property name="y">63</property>
-                  </packing>
-                </child>
               </object>
               <packing>
                 <property name="name">page0</property>
@@ -127,6 +114,8 @@
     </child>
   </object>
   <object class="GtkWindow" id="window_user">
+    <property name="width_request">600</property>
+    <property name="height_request">600</property>
     <property name="can_focus">False</property>
     <signal name="destroy" handler="on_window_user_destroy" swapped="no"/>
     <child type="titlebar">
@@ -281,18 +270,21 @@
                   </object>
                 </child>
                 <child>
-                  <object class="GtkButton" id="go_dash">
-                    <property name="label" translatable="yes">Go dash</property>
-                    <property name="width_request">100</property>
-                    <property name="height_request">80</property>
+                  <object class="GtkLabel" id="sign_in_label_message">
+                    <property name="width_request">345</property>
+                    <property name="height_request">213</property>
                     <property name="visible">True</property>
-                    <property name="can_focus">True</property>
-                    <property name="receives_default">True</property>
-                    <signal name="clicked" handler="on_go_dash_clicked" swapped="no"/>
+                    <property name="can_focus">False</property>
+                    <property name="label" translatable="yes">
+
+</property>
+                    <attributes>
+                      <attribute name="underline-color" value="#a4a400000000"/>
+                    </attributes>
                   </object>
                   <packing>
-                    <property name="x">230</property>
-                    <property name="y">235</property>
+                    <property name="x">161</property>
+                    <property name="y">153</property>
                   </packing>
                 </child>
               </object>
@@ -527,6 +519,7 @@
                                 <property name="receives_default">False</property>
                                 <property name="active">True</property>
                                 <property name="draw_indicator">True</property>
+                                <signal name="toggled" handler="on_sign_up_gender_male_toggled" swapped="no"/>
                               </object>
                               <packing>
                                 <property name="left_attach">0</property>
@@ -541,6 +534,7 @@
                                 <property name="receives_default">False</property>
                                 <property name="draw_indicator">True</property>
                                 <property name="group">sign_up_gender</property>
+                                <signal name="toggled" handler="on_sign_up_gender_female_toggled" swapped="no"/>
                               </object>
                               <packing>
                                 <property name="left_attach">1</property>
