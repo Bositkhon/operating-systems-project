@@ -4,7 +4,7 @@
 #include <json-c/json.h>
 #include <stdio.h>
 #include <mysql/mysql.h>
-#include <socket.h>
+#include "../include/socket.h"
 
 extern MYSQL *connection;
 
@@ -175,7 +175,7 @@ int update_user(int pk,
 
 int update_password(unsigned int pk, char *password) {
 	char query[256];
-	sprintf(query, "update users set password=%s where id=%d", password);
+	sprintf(query, "update users set password=%s where id=%d", password, pk);
 	return mysql_query(connection, query);
 }
 
