@@ -19,27 +19,26 @@ GtkWidget *window_user;
 GtkWidget *window_dashboard;
 
 typedef struct{
-	GtkWidget *email;
-	GtkWidget *password;
-	GtkWidget *login;
+	GtkEntry *email;
+	GtkEntry *password;
+	GtkButton *login;
 } sign_in_widgets;
 
 typedef struct{
-	GtkWidget *email;
-	GtkWidget *password;
-	GtkWidget *firstname;
-   GtkWidget *lastname;
-   GtkWidget *phone;
-   gchar *gender;
-   GtkWidget *birth_date;
-   GtkWidget *passport_serial;
-   GtkWidget *passport_number;
+    GtkEntry *email;
+	GtkEntry *password;
+	GtkEntry *firstname;
+    GtkEntry *lastname;
+    GtkEntry *phone;
+    gchar *gender;
+    GtkEntry *birth_date;
+    GtkEntry *passport_serial;
+    GtkEntry *passport_number;
 } sign_up_widgets;
 
 sign_in_widgets *s_in_widgets;
 sign_up_widgets *s_up_widgets;
 
-//sign_in_widgets *s_in_widgets = g_slice_new(sign_in_widgets);
 int sock;
 struct sockaddr_in server;
 struct hostent *hp;
@@ -79,33 +78,29 @@ void *receiveFromServer(void *data)
         if (n < 1) {
             error("Reading from socket");
         }
-
         buffer[n] = '\0';
-
         response = json_tokener_parse(buffer);
 
         const char *action = json_object_get_string(json_object_object_get(response, "action"));
 
-        printf("Action is %s\n", action);
-
         if (strcmp(action, "sign-in")) {
             json_object *payload = json_object_object_get(response, "payload");
-            json_object *successObj = json_object_object_get(payload, "success");
-            json_object *messageObj = json_object_object_get(payload, "message");
-            const int success = json_object_get_int(successObj);
-            const char *message = json_object_get_string(messageObj);
-            if (success == 1) {
-                json_object *me = json_object_object_get(payload, "me");
+
+            const int success = json_object_get_int(json_object_object_get(payload, "success"));
+            // const char *message = json_object_get_string(json_object_object_get(payload, "message"));
+
+            if (success) {
+                // TODO: on success
+                // json_object *me = json_object_object_get(payload, "me");
                // gtk_label_set_text(s_in_widgets->message_label, json_object_to_json_string(me));
-            } else if (success == 0) {
+            } else {
+                // TODO: on fail
                // gtk_label_set_text(s_in_widgets->message_label, message);
             }
         } else if (strcmp(action, "sign-up")) {
-            json_object *payload = json_object_object_get(response, "payload");
-            json_object *successObj = json_object_object_get(payload, "success");
-            json_object *messageObj = json_object_object_get(payload, "message");
-            const int success = json_object_get_int(successObj);
-            const char *message = json_object_get_string(messageObj);
+            // json_object *payload = json_object_object_get(response, "payload");
+            // const int success = json_object_get_int(json_object_object_get(payload, "success"));
+            // const char *message = json_object_get_string(json_object_object_get(payload, "message"));
         }
 
         printf("(Client) The message received: %s\n", json_object_to_json_string(response));
@@ -159,19 +154,19 @@ int main(int argc, char *argv[])
     window_user = GTK_WIDGET(gtk_builder_get_object(builder, "window_user"));
     window_dashboard = GTK_WIDGET(gtk_builder_get_object(builder, "window_dashboard"));
     
-    s_in_widgets->email = GTK_WIDGET(gtk_builder_get_object(builder, "sign_in_input_email"));
+    s_in_widgets->email = (GtkEntry *)GTK_WIDGET(gtk_builder_get_object(builder, "sign_in_input_email"));
    
-	 s_in_widgets->password  = GTK_WIDGET(gtk_builder_get_object(builder, "sign_in_input_password"));
-    s_in_widgets->login  = GTK_WIDGET(gtk_builder_get_object(builder, "sign_in_button_login"));
+    s_in_widgets->password  = (GtkEntry *)GTK_WIDGET(gtk_builder_get_object(builder, "sign_in_input_password"));
+    s_in_widgets->login  = (GtkButton *)GTK_WIDGET(gtk_builder_get_object(builder, "sign_in_button_login"));
     
-    s_up_widgets->email  = GTK_WIDGET(gtk_builder_get_object(builder, "sign_up_input_email"));
-    s_up_widgets->password  = GTK_WIDGET(gtk_builder_get_object(builder, "sign_up_input_password"));
-    s_up_widgets->firstname  = GTK_WIDGET(gtk_builder_get_object(builder, "sign_up_input_firstname"));
-    s_up_widgets->lastname  = GTK_WIDGET(gtk_builder_get_object(builder, "sign_up_input_lastname"));
-    s_up_widgets->phone  = GTK_WIDGET(gtk_builder_get_object(builder, "sign_up_input_phone"));
-    s_up_widgets->birth_date  = GTK_WIDGET(gtk_builder_get_object(builder, "sign_up_input_birth_date"));
-    s_up_widgets->passport_serial  = GTK_WIDGET(gtk_builder_get_object(builder, "sign_up_input_passport_serial"));
-    s_up_widgets->passport_number  = GTK_WIDGET(gtk_builder_get_object(builder, "sign_up_input_passport_number"));
+    s_up_widgets->email  = (GtkEntry *)GTK_WIDGET(gtk_builder_get_object(builder, "sign_up_input_email"));
+    s_up_widgets->password  = (GtkEntry *)GTK_WIDGET(gtk_builder_get_object(builder, "sign_up_input_password"));
+    s_up_widgets->firstname  = (GtkEntry *)GTK_WIDGET(gtk_builder_get_object(builder, "sign_up_input_firstname"));
+    s_up_widgets->lastname  = (GtkEntry *)GTK_WIDGET(gtk_builder_get_object(builder, "sign_up_input_lastname"));
+    s_up_widgets->phone  = (GtkEntry *)GTK_WIDGET(gtk_builder_get_object(builder, "sign_up_input_phone"));
+    s_up_widgets->birth_date  = (GtkEntry *)GTK_WIDGET(gtk_builder_get_object(builder, "sign_up_input_birth_date"));
+    s_up_widgets->passport_serial  = (GtkEntry *)GTK_WIDGET(gtk_builder_get_object(builder, "sign_up_input_passport_serial"));
+    s_up_widgets->passport_number  = (GtkEntry *)GTK_WIDGET(gtk_builder_get_object(builder, "sign_up_input_passport_number"));
     
     gtk_builder_connect_signals(builder, NULL);
 
@@ -254,7 +249,6 @@ void on_sign_up_button_register_clicked(GtkButton *button)
     
     
     json_object_object_add(request, "payload", payload);
-    printf("%s",s_up_widgets->gender);
 
     char temp_buff[100000];
 
