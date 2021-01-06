@@ -164,6 +164,7 @@ int main(int argc, char *argv[])
     s_up_widgets->firstname  = (GtkEntry *)GTK_WIDGET(gtk_builder_get_object(builder, "sign_up_input_firstname"));
     s_up_widgets->lastname  = (GtkEntry *)GTK_WIDGET(gtk_builder_get_object(builder, "sign_up_input_lastname"));
     s_up_widgets->phone  = (GtkEntry *)GTK_WIDGET(gtk_builder_get_object(builder, "sign_up_input_phone"));
+    s_up_widgets->gender  = "male";
     s_up_widgets->birth_date  = (GtkEntry *)GTK_WIDGET(gtk_builder_get_object(builder, "sign_up_input_birth_date"));
     s_up_widgets->passport_serial  = (GtkEntry *)GTK_WIDGET(gtk_builder_get_object(builder, "sign_up_input_passport_serial"));
     s_up_widgets->passport_number  = (GtkEntry *)GTK_WIDGET(gtk_builder_get_object(builder, "sign_up_input_passport_number"));
