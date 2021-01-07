@@ -14,15 +14,15 @@ GTK=`pkg-config --cflags --libs gtk+-3.0` -export-dynamic
 MYSQL=`mysql_config --cflags --libs`
 JSON=-l json-c
 
-all: server client
+all: clean server client runserver runclient
 
-client: src/client.c
-	gcc -o $(TARGETCLIENT) src/client.c -Wall $(GTK) ${JSON}
-server: src/server.c
-	gcc -o $(TARGETSERVER) src/server.c -lpthread $(MYSQL) ${JSON}
+client: src/client/client.c
+	gcc -o $(TARGETCLIENT) src/client/client.c -Wall $(GTK) ${JSON}
+server: src/server/server.c
+	gcc -o $(TARGETSERVER) src/server/server.c -lpthread $(MYSQL) ${JSON}
 runclient: client
 	./client $(HOST) $(PORT)
 runserver: server
-	./server $(PORT)
+	./server $(PORT) &
 clean:
 	rm -f *.o $(TARGETCLIENT) $(TARGETSERVER)

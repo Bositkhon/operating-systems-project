@@ -4,7 +4,7 @@
 #include <json-c/json.h>
 #include <stdio.h>
 #include <mysql/mysql.h>
-#include "../include/socket.h"
+#include "../server/include/socket.h"
 
 extern MYSQL *connection;
 

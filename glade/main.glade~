@@ -1,134 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Generated with glade 3.22.1 -->
+<!-- Generated with glade 3.22.2 -->
 <interface>
   <requires lib="gtk+" version="3.20"/>
-  <object class="GtkWindow" id="window_dashboard">
+  <object class="GtkWindow" id="landing_window">
     <property name="can_focus">False</property>
-    <signal name="destroy" handler="on_window_dashboard_destroy" swapped="no"/>
-    <child type="titlebar">
-      <placeholder/>
-    </child>
-    <child>
-      <object class="GtkFixed">
-        <property name="visible">True</property>
-        <property name="can_focus">False</property>
-        <child>
-          <object class="GtkBox">
-            <property name="width_request">667</property>
-            <property name="visible">True</property>
-            <property name="can_focus">False</property>
-            <property name="margin_left">20</property>
-            <property name="margin_right">20</property>
-            <property name="margin_top">5</property>
-            <property name="margin_bottom">5</property>
-            <property name="orientation">vertical</property>
-            <child>
-              <object class="GtkGrid">
-                <property name="visible">True</property>
-                <property name="can_focus">False</property>
-                <property name="column_homogeneous">True</property>
-                <child>
-                  <object class="GtkStackSwitcher" id="dasboard_switchers">
-                    <property name="visible">True</property>
-                    <property name="can_focus">False</property>
-                    <property name="halign">start</property>
-                    <property name="stack">dasboard_stack</property>
-                  </object>
-                  <packing>
-                    <property name="left_attach">0</property>
-                    <property name="top_attach">0</property>
-                  </packing>
-                </child>
-                <child>
-                  <object class="GtkButton" id="dashboard_button_logout">
-                    <property name="label" translatable="yes">Log out</property>
-                    <property name="visible">True</property>
-                    <property name="can_focus">True</property>
-                    <property name="receives_default">True</property>
-                    <property name="halign">end</property>
-                  </object>
-                  <packing>
-                    <property name="left_attach">1</property>
-                    <property name="top_attach">0</property>
-                  </packing>
-                </child>
-              </object>
-              <packing>
-                <property name="expand">False</property>
-                <property name="fill">True</property>
-                <property name="position">0</property>
-              </packing>
-            </child>
-          </object>
-        </child>
-        <child>
-          <object class="GtkStack" id="dasboard_stack">
-            <property name="width_request">667</property>
-            <property name="height_request">397</property>
-            <property name="visible">True</property>
-            <property name="can_focus">False</property>
-            <property name="margin_left">20</property>
-            <property name="margin_right">20</property>
-            <property name="margin_top">20</property>
-            <property name="margin_bottom">20</property>
-            <child>
-              <object class="GtkFixed" id="dashboard_stack_dashboard">
-                <property name="visible">True</property>
-                <property name="can_focus">False</property>
-                <child>
-                  <object class="GtkButton" id="go_user">
-                    <property name="label" translatable="yes">Go user</property>
-                    <property name="width_request">100</property>
-                    <property name="height_request">80</property>
-                    <property name="visible">True</property>
-                    <property name="can_focus">True</property>
-                    <property name="receives_default">True</property>
-                    <signal name="clicked" handler="on_go_user_clicked" swapped="no"/>
-                  </object>
-                  <packing>
-                    <property name="x">232</property>
-                    <property name="y">63</property>
-                  </packing>
-                </child>
-              </object>
-              <packing>
-                <property name="name">page0</property>
-                <property name="title" translatable="yes">Dashboard</property>
-              </packing>
-            </child>
-            <child>
-              <object class="GtkFixed" id="dashboard_stack_account">
-                <property name="visible">True</property>
-                <property name="can_focus">False</property>
-              </object>
-              <packing>
-                <property name="name">page1</property>
-                <property name="title" translatable="yes">Account</property>
-                <property name="position">1</property>
-              </packing>
-            </child>
-            <child>
-              <object class="GtkFixed" id="dashboard_stack_feedback">
-                <property name="visible">True</property>
-                <property name="can_focus">False</property>
-              </object>
-              <packing>
-                <property name="name">page2</property>
-                <property name="title" translatable="yes">Feedback</property>
-                <property name="position">2</property>
-              </packing>
-            </child>
-          </object>
-          <packing>
-            <property name="y">67</property>
-          </packing>
-        </child>
-      </object>
-    </child>
-  </object>
-  <object class="GtkWindow" id="window_user">
-    <property name="can_focus">False</property>
-    <signal name="destroy" handler="on_window_user_destroy" swapped="no"/>
+    <signal name="destroy" handler="on_landing_window_destroy" swapped="no"/>
     <child type="titlebar">
       <placeholder/>
     </child>
@@ -281,18 +157,15 @@
                   </object>
                 </child>
                 <child>
-                  <object class="GtkButton" id="go_dash">
-                    <property name="label" translatable="yes">Go dash</property>
+                  <object class="GtkLabel" id="sign_in_message_label">
                     <property name="width_request">100</property>
                     <property name="height_request">80</property>
                     <property name="visible">True</property>
-                    <property name="can_focus">True</property>
-                    <property name="receives_default">True</property>
-                    <signal name="clicked" handler="on_go_dash_clicked" swapped="no"/>
+                    <property name="can_focus">False</property>
                   </object>
                   <packing>
-                    <property name="x">230</property>
-                    <property name="y">235</property>
+                    <property name="x">303</property>
+                    <property name="y">194</property>
                   </packing>
                 </child>
               </object>
@@ -527,6 +400,7 @@
                                 <property name="receives_default">False</property>
                                 <property name="active">True</property>
                                 <property name="draw_indicator">True</property>
+                                <signal name="toggled" handler="on_sign_up_gender_male_toggled" swapped="no"/>
                               </object>
                               <packing>
                                 <property name="left_attach">0</property>
@@ -541,6 +415,7 @@
                                 <property name="receives_default">False</property>
                                 <property name="draw_indicator">True</property>
                                 <property name="group">sign_up_gender</property>
+                                <signal name="toggled" handler="on_sign_up_gender_female_toggled" swapped="no"/>
                               </object>
                               <packing>
                                 <property name="left_attach">1</property>
@@ -579,6 +454,18 @@
                     </child>
                   </object>
                 </child>
+                <child>
+                  <object class="GtkLabel" id="sign_up_message_label">
+                    <property name="width_request">100</property>
+                    <property name="height_request">80</property>
+                    <property name="visible">True</property>
+                    <property name="can_focus">False</property>
+                  </object>
+                  <packing>
+                    <property name="x">193</property>
+                    <property name="y">417</property>
+                  </packing>
+                </child>
               </object>
               <packing>
                 <property name="name">page1</property>
@@ -589,6 +476,199 @@
           </object>
           <packing>
             <property name="y">97</property>
+          </packing>
+        </child>
+      </object>
+    </child>
+  </object>
+  <object class="GtkTreeStore" id="schedule_tree_store">
+    <columns>
+      <!-- column-name Departure -->
+      <column type="gchararray"/>
+      <!-- column-name Arrival -->
+      <column type="gchararray"/>
+      <!-- column-name Departure1 -->
+      <column type="gchararray"/>
+      <!-- column-name Arrival1 -->
+      <column type="gchararray"/>
+      <!-- column-name Distance -->
+      <column type="gdouble"/>
+    </columns>
+  </object>
+  <object class="GtkWindow" id="dashboard_window">
+    <property name="can_focus">False</property>
+    <signal name="destroy" handler="on_dashboard_window_destroy" swapped="no"/>
+    <child type="titlebar">
+      <placeholder/>
+    </child>
+    <child>
+      <object class="GtkFixed">
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+        <child>
+          <object class="GtkBox">
+            <property name="width_request">667</property>
+            <property name="visible">True</property>
+            <property name="can_focus">False</property>
+            <property name="margin_left">20</property>
+            <property name="margin_right">20</property>
+            <property name="margin_top">5</property>
+            <property name="margin_bottom">5</property>
+            <property name="orientation">vertical</property>
+            <child>
+              <object class="GtkGrid">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <property name="column_homogeneous">True</property>
+                <child>
+                  <object class="GtkStackSwitcher" id="dasboard_switchers">
+                    <property name="visible">True</property>
+                    <property name="can_focus">False</property>
+                    <property name="halign">start</property>
+                    <property name="stack">dasboard_stack</property>
+                  </object>
+                  <packing>
+                    <property name="left_attach">0</property>
+                    <property name="top_attach">0</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkButton" id="dashboard_button_logout">
+                    <property name="label" translatable="yes">Log out</property>
+                    <property name="visible">True</property>
+                    <property name="can_focus">True</property>
+                    <property name="receives_default">True</property>
+                    <property name="halign">end</property>
+                  </object>
+                  <packing>
+                    <property name="left_attach">1</property>
+                    <property name="top_attach">0</property>
+                  </packing>
+                </child>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">True</property>
+                <property name="position">0</property>
+              </packing>
+            </child>
+          </object>
+        </child>
+        <child>
+          <object class="GtkStack" id="dasboard_stack">
+            <property name="width_request">667</property>
+            <property name="height_request">397</property>
+            <property name="visible">True</property>
+            <property name="can_focus">False</property>
+            <property name="margin_left">20</property>
+            <property name="margin_right">20</property>
+            <property name="margin_top">20</property>
+            <property name="margin_bottom">20</property>
+            <child>
+              <object class="GtkFixed" id="dashboard_stack_dashboard">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <child>
+                  <object class="GtkScrolledWindow" id="schedule_tree_scroll_view">
+                    <property name="width_request">100</property>
+                    <property name="height_request">80</property>
+                    <property name="visible">True</property>
+                    <property name="can_focus">True</property>
+                    <property name="shadow_type">in</property>
+                    <property name="min_content_width">1000</property>
+                    <property name="min_content_height">600</property>
+                    <child>
+                      <object class="GtkViewport" id="schedule_tree_view_port">
+                        <property name="visible">True</property>
+                        <property name="can_focus">False</property>
+                        <child>
+                          <object class="GtkTreeView" id="schedule_tree_view">
+                            <property name="visible">True</property>
+                            <property name="can_focus">True</property>
+                            <property name="model">schedule_tree_store</property>
+                            <property name="search_column">0</property>
+                            <child internal-child="selection">
+                              <object class="GtkTreeSelection" id="schedule_tree_selection">
+                                <signal name="changed" handler="on_select_schedule_changed" swapped="no"/>
+                              </object>
+                            </child>
+                            <child>
+                              <object class="GtkTreeViewColumn" id="departure_city_column">
+                                <property name="title" translatable="yes">Depature City</property>
+                                <child>
+                                  <object class="GtkCellRendererText" id="departure_city_text"/>
+                                </child>
+                              </object>
+                            </child>
+                            <child>
+                              <object class="GtkTreeViewColumn" id="arrival_city_column">
+                                <property name="title" translatable="yes">Arrival City</property>
+                                <child>
+                                  <object class="GtkCellRendererText" id="arrival_city_text"/>
+                                </child>
+                              </object>
+                            </child>
+                            <child>
+                              <object class="GtkTreeViewColumn" id="departure_date_column">
+                                <property name="title" translatable="yes">Departure Date</property>
+                                <child>
+                                  <object class="GtkCellRendererText" id="departure_date_text"/>
+                                </child>
+                              </object>
+                            </child>
+                            <child>
+                              <object class="GtkTreeViewColumn" id="arrival_date_column">
+                                <property name="title" translatable="yes">Arrival Date</property>
+                                <child>
+                                  <object class="GtkCellRendererText" id="arrival_date_text"/>
+                                </child>
+                              </object>
+                            </child>
+                            <child>
+                              <object class="GtkTreeViewColumn" id="distance_column">
+                                <property name="title" translatable="yes">Distance</property>
+                                <child>
+                                  <object class="GtkCellRendererText" id="distance_text"/>
+                                </child>
+                              </object>
+                            </child>
+                          </object>
+                        </child>
+                      </object>
+                    </child>
+                  </object>
+                </child>
+              </object>
+              <packing>
+                <property name="name">page0</property>
+                <property name="title" translatable="yes">Dashboard</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkFixed" id="dashboard_stack_account">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+              </object>
+              <packing>
+                <property name="name">page1</property>
+                <property name="title" translatable="yes">Account</property>
+                <property name="position">1</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkFixed" id="dashboard_stack_feedback">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+              </object>
+              <packing>
+                <property name="name">page2</property>
+                <property name="title" translatable="yes">Feedback</property>
+                <property name="position">2</property>
+              </packing>
+            </child>
+          </object>
+          <packing>
+            <property name="y">67</property>
           </packing>
         </child>
       </object>
